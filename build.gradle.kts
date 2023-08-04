@@ -18,11 +18,13 @@ repositories {
     maven("https://jitpack.io")
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.incendo.org/content/repositories/snapshots")
+    maven("https://repo.codemc.io/repository/maven-public/")
 }
 val paperVersion = "1.20.1-R0.1-SNAPSHOT"
 val cloudVersion = "1.7.1"
 val vaultVersion = "1.7"
 val mccoroutineVersion = "2.11.0"
+val quickShopVersion = "4.2.2.9"
 
 dependencies {
     compileOnly("io.papermc.paper", "paper-api", paperVersion)
@@ -31,9 +33,13 @@ dependencies {
 
     compileOnly("com.github.MilkBowl", "VaultAPI", vaultVersion)
 
+    compileOnly("com.ghostchu", "quickshop-bukkit", quickShopVersion)
+    compileOnly("com.ghostchu", "quickshop-api", quickShopVersion)
+
     implementation("cloud.commandframework", "cloud-core", cloudVersion)
     implementation("cloud.commandframework", "cloud-kotlin-extensions", cloudVersion)
     implementation("cloud.commandframework", "cloud-paper", cloudVersion)
+    implementation("cloud.commandframework", "cloud-brigadier", cloudVersion)
     implementation("cloud.commandframework", "cloud-annotations", cloudVersion)
     implementation("cloud.commandframework", "cloud-kotlin-coroutines-annotations", cloudVersion)
     implementation("cloud.commandframework", "cloud-kotlin-coroutines", cloudVersion)
@@ -47,40 +53,44 @@ dependencies {
 
 java {
 
-toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 tasks {
-compileKotlin {
-kotlinOptions.jvmTarget = "17"
-kotlinOptions.javaParameters = true
-}
-compileTestKotlin {
-kotlinOptions.jvmTarget = "17"
-}
-build {
-dependsOn(shadowJar)
-}
+    compileKotlin {
+        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.javaParameters = true
+    }
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "17"
+    }
+    build {
+        dependsOn(shadowJar)
+    }
 }
 tasks.withType<JavaCompile>().configureEach {
-options.encoding = "UTF-8"
+    options.encoding = "UTF-8"
 }
 
 tasks {
-runServer {
-minecraftVersion("1.20.1")
-}
+    runServer {
+        minecraftVersion("1.20.1")
+    }
 }
 
 
 bukkit {
-    name = "Template" // need to change
+    name = "AdvancedShopFinder" // need to change
     version = "miencraft_plugin_version"
-    website = "https://github.com/Nlkomaru/NoticeTemplate"  // need to change
+    website = "https://github.com/Nlkomaru/AdvancedShopFinder"  // need to change
 
-    main = "$group.template.Template"  // need to change
+    main = "$group.advancedshopfinder.AdvancedShopFinder"  // need to change
+
+    depend = listOf("QuickShop-Hikari") // need to change
 
     apiVersion = "1.20"
-    libraries = listOf("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.11.0",
-        "com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.11.0")
+    libraries = listOf(
+        "com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.11.0",
+        "com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.11.0"
+    )
 }

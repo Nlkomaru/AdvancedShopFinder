@@ -1,4 +1,4 @@
-package dev.nikomaru.template.utils.coroutines
+package dev.nikomaru.advancedshopfinder.utils.coroutines
 
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
