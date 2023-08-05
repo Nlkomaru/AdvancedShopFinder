@@ -21,10 +21,11 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-public/")
 }
 val paperVersion = "1.20.1-R0.1-SNAPSHOT"
-val cloudVersion = "1.7.1"
+val cloudVersion = "1.8.3"
 val vaultVersion = "1.7"
 val mccoroutineVersion = "2.11.0"
 val quickShopVersion = "4.2.2.9"
+val lampVersion = "3.1.5"
 
 dependencies {
     compileOnly("io.papermc.paper", "paper-api", paperVersion)

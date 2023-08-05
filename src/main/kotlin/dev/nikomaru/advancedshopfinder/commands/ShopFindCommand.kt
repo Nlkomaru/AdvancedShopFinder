@@ -26,8 +26,10 @@ class ShopFindCommand {
         sender: CommandSender,
         @Argument(value = "itemName", suggestions = "itemName") itemName: String,
     ) {
+        val item = getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
+
         val shop = AdvancedShopFinder.quickShop.shopManager.allShops.filter {
-            it.item.type.name.equals(itemName, true)
+            it.item.type.translationKey().equals(item, true)
         }
         if (shop.isEmpty()) {
             sender.sendRichMessage("検索結果: 0件")
@@ -118,6 +120,18 @@ class ShopFindCommand {
 
     @Suggestions("itemName")
     fun itemNameSuggestions(sender: CommandContext<CommandSender>, input: String?): List<String> {
-        return Material.values().filter { it.isItem }.map { it.name.lowercase() }
+        return Material.values().map {
+            AdvancedShopFinder.translateData[it.translationKey()] ?: it.translationKey()
+        } + Material.values().map { it.name.lowercase() }
+    }
+
+
+    fun <K, V> getKey(map: Map<K, V>, value: V): K? {
+        for (key in map.keys) {
+            if (value == map[key]) {
+                return key
+            }
+        }
+        return null
     }
 }
