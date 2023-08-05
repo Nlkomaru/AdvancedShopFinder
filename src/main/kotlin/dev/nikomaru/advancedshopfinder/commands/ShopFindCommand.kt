@@ -15,7 +15,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import sun.rmi.server.Dispatcher
+import java.text.MessageFormat
 import kotlin.math.hypot
 
 
@@ -39,30 +39,39 @@ class ShopFindCommand {
             val nearPlace = Config.config.placeData.minByOrNull {
                 hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
             }
-            val distance = hypot(
+            val nearTownDistance = hypot(
                 nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ
             )
             val playerLocation =
                 if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
-            withContext(Dispatchers.minecraft) {
-                sender.sendRichMessage(
-                    "<color:green>販売: オーナー: <color:yellow>${Bukkit.getOfflinePlayer(shopChest.owner).name} " +
-                    "<color:green>値段: <color:yellow>${shopChest.price}/${shopChest.shopStackingAmount}個 " +
-                    "<color:green>在庫: <color:yellow>${
-                        if (shopChest.isUnlimited) {
-                            "無制限"
-                        } else {
-                            "${shopChest.remainingStock} * ${shopChest.shopStackingAmount}個"
-                        }
-                    } " +
-                    "<color:green>座標: <color:yellow>${shopChest.location.world.name} x:${shopChest.location.blockX} y:${shopChest.location.blockY} z:${shopChest.location.blockZ} " +
-                    "<color:green>距離: <color:yellow>${
-                        hypot(
-                            playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z
-                        ).toInt()
-                    }ブロック " + "<color:green>最寄り: <color:yellow>${nearPlace.placeName}から${distance.toInt()}ブロック"
-                )
+            val distance =
+                hypot(playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z).toInt()
+            val count = withContext(Dispatchers.minecraft) {
+                if (shopChest.isUnlimited) {
+                    "無制限"
+                } else {
+                    "${shopChest.remainingStock} * ${shopChest.shopStackingAmount}個"
+                }
             }
+            sender.sendRichMessage(
+                MessageFormat.format(
+                    MessageFormat.format(
+                        Config.config.format,
+                        Bukkit.getOfflinePlayer(shopChest.owner).name,
+                        shopChest.price,
+                        shopChest.shopStackingAmount,
+                        count,
+                        shopChest.location.world.name,
+                        shopChest.location.blockX,
+                        shopChest.location.blockY,
+                        shopChest.location.blockZ,
+                        distance,
+                        nearPlace.placeName,
+                        nearTownDistance.toInt(),
+                        "<color:green>販売"
+                    )
+                )
+            )
 
         }
         val buy = shop.filter { it.shopType == ShopType.BUYING }
@@ -71,36 +80,44 @@ class ShopFindCommand {
             val nearPlace = Config.config.placeData.minByOrNull {
                 hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
             }
-            val distance = hypot(
+            val nearTownDistance = hypot(
                 nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ
             )
             val playerLocation =
                 if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
-
-            withContext(Dispatchers.minecraft) {
-                sender.sendRichMessage(
-                    "<color:red>買取: オーナー: <color:yellow>${Bukkit.getOfflinePlayer(shopChest.owner).name} " +
-                    "<color:green>値段: <color:yellow>${shopChest.price}/${shopChest.shopStackingAmount}個" +
-                    "<color:green>在庫: <color:yellow>${
-                        if (shopChest.isUnlimited) {
-                            "無制限"
-                        } else {
-                            "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
-                        }} " +
-                    "<color:green>座標: <color:yellow>${shopChest.location.world.name} x:${shopChest.location.blockX} y:${shopChest.location.blockY} z:${shopChest.location.blockZ} " +
-                    "<color:green>距離: <color:yellow>${
-                        hypot(
-                            playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z
-                        ).toInt()
-                    }ブロック " +
-                    "<color:green>最寄り: <color:yellow>${nearPlace.placeName}から${distance.toInt()}ブロック")
-                    }
+            val distance =
+                hypot(playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z).toInt()
+            val count = withContext(Dispatchers.minecraft) {
+                if (shopChest.isUnlimited) {
+                    "無制限"
+                } else {
+                    "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
+                }
             }
-
-        }
-
-        @Suggestions("itemName")
-        fun itemNameSuggestions(sender: CommandContext<CommandSender>, input: String?): List<String> {
-            return Material.values().filter { it.isItem }.map { it.name.lowercase() }
+            sender.sendRichMessage(
+                MessageFormat.format(
+                    MessageFormat.format(
+                        Config.config.format,
+                        Bukkit.getOfflinePlayer(shopChest.owner).name,
+                        shopChest.price,
+                        shopChest.shopStackingAmount,
+                        count,
+                        shopChest.location.world.name,
+                        shopChest.location.blockX,
+                        shopChest.location.blockY,
+                        shopChest.location.blockZ,
+                        distance,
+                        nearPlace.placeName,
+                        nearTownDistance.toInt(),
+                        "<color:red>買取"
+                    )
+                )
+            )
         }
     }
+
+    @Suggestions("itemName")
+    fun itemNameSuggestions(sender: CommandContext<CommandSender>, input: String?): List<String> {
+        return Material.values().filter { it.isItem }.map { it.name.lowercase() }
+    }
+}

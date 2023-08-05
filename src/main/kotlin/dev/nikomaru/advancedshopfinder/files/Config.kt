@@ -31,6 +31,8 @@ object Config {
 @Serializable
 data class ConfigData(
     val placeData: List<PlaceData>,
+    val format : String = "{11}: オーナー: <color:yellow>{0} <color:green>値段: <color:yellow>{1}/{2}個 <color:green>在庫: <color:yellow>{3}  <color:green>座標: <color:yellow>{4} x:{5} y:{6} z:{7} <color:green>距離: <color:yellow>{8}ブロック <color:green>最寄り: <color:yellow>{9}から{10}ブロック"
+
 )
 
 @Serializable
