@@ -83,6 +83,7 @@ bukkit {
     name = "AdvancedShopFinder" // need to change
     version = "miencraft_plugin_version"
     website = "https://github.com/Nlkomaru/AdvancedShopFinder"  // need to change
+    description = "Quickshop finder"
 
     main = "$group.advancedshopfinder.AdvancedShopFinder"  // need to change
 
