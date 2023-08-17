@@ -26,7 +26,8 @@ class ShopFindCommand {
         sender: CommandSender,
         @Argument(value = "itemName", suggestions = "itemName") itemName: String,
     ) {
-        val item = getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
+        val item =
+            getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
 
         val shop = AdvancedShopFinder.quickShop.shopManager.allShops.filter {
             it.item.type.translationKey().equals(item, true)
@@ -35,8 +36,9 @@ class ShopFindCommand {
             sender.sendRichMessage("検索結果: 0件")
             return
         }
+        val message = arrayListOf<String>()
         sender.sendRichMessage("<color:green>検索結果: ${shop.size}件")
-        val sell = shop.filter { it.shopType == ShopType.SELLING }
+        val sell = shop.filter { it.shopType == ShopType.SELLING && it.remainingStock > 0 }.sortedBy { it.price }
         sell.forEach { shopChest ->
             val nearPlace = Config.config.placeData.minByOrNull {
                 hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
@@ -55,7 +57,7 @@ class ShopFindCommand {
                     "${shopChest.remainingStock} * ${shopChest.shopStackingAmount}個"
                 }
             }
-            sender.sendRichMessage(
+            message.add(
                 MessageFormat.format(
                     MessageFormat.format(
                         Config.config.format,
@@ -76,7 +78,7 @@ class ShopFindCommand {
             )
 
         }
-        val buy = shop.filter { it.shopType == ShopType.BUYING }
+        val buy = shop.filter { it.shopType == ShopType.BUYING && it.remainingSpace > 0 }.sortedBy { -it.price }
         buy.forEach { shopChest ->
 
             val nearPlace = Config.config.placeData.minByOrNull {
@@ -96,7 +98,7 @@ class ShopFindCommand {
                     "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
                 }
             }
-            sender.sendRichMessage(
+            message.add(
                 MessageFormat.format(
                     MessageFormat.format(
                         Config.config.format,
@@ -116,6 +118,8 @@ class ShopFindCommand {
                 )
             )
         }
+
+        sender.sendRichMessage(message.joinToString("\n"))
     }
 
     @Suggestions("itemName")
