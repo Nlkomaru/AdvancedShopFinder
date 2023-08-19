@@ -37,8 +37,8 @@ class ShopFindCommand {
             return
         }
         val message = arrayListOf<String>()
-        sender.sendRichMessage("<color:green>検索結果: ${shop.size}件")
-        val sell = shop.filter { it.shopType == ShopType.SELLING && withContext(Dispatchers.minecraft){it.remainingStock} > 0 }.sortedBy { it.price }
+
+        val sell = shop.filter { it.shopType == ShopType.SELLING && withContext(Dispatchers.minecraft){it.remainingStock} > 0 }.sortedBy { it.price / it.remainingStock }
         sell.forEach { shopChest ->
             val nearPlace = Config.config.placeData.minByOrNull {
                 hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
@@ -78,7 +78,7 @@ class ShopFindCommand {
             )
 
         }
-        val buy = shop.filter { it.shopType == ShopType.BUYING && withContext(Dispatchers.minecraft){it.remainingSpace} > 0 }.sortedBy { -it.price }
+        val buy = shop.filter { it.shopType == ShopType.BUYING && withContext(Dispatchers.minecraft){it.remainingSpace} > 0 }.sortedBy { -it.price / it.shopStackingAmount }
         buy.forEach { shopChest ->
 
             val nearPlace = Config.config.placeData.minByOrNull {
@@ -118,7 +118,7 @@ class ShopFindCommand {
                 )
             )
         }
-
+        sender.sendRichMessage("<color:green>検索結果: ${message.size}件")
         sender.sendRichMessage(message.joinToString("\n"))
     }
 
