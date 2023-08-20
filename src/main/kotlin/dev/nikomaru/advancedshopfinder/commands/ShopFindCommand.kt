@@ -38,7 +38,7 @@ class ShopFindCommand {
         }
         val message = arrayListOf<String>()
 
-        val sell = shop.filter { it.shopType == ShopType.SELLING && withContext(Dispatchers.minecraft){it.remainingStock} > 0 }.sortedBy { it.price / it.remainingStock }
+        val sell = shop.filter { it.shopType == ShopType.SELLING && withContext(Dispatchers.minecraft){it.remainingStock} > 0 }.sortedBy { it.price / it.shopStackingAmount }
         sell.forEach { shopChest ->
             val nearPlace = Config.config.placeData.minByOrNull {
                 hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
