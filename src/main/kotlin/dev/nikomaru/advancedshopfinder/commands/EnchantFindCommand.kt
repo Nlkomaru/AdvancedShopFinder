@@ -2,11 +2,11 @@ package dev.nikomaru.advancedshopfinder.commands
 
 import cloud.commandframework.annotations.Argument
 import cloud.commandframework.annotations.CommandMethod
-import cloud.commandframework.annotations.suggestions.Suggestions
-import cloud.commandframework.context.CommandContext
-import com.ghostchu.quickshop.api.shop.Shop
 import com.ghostchu.quickshop.api.shop.ShopType
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
+import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getBuyShopCount
+import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getPlayerDistance
+import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getSellShopCount
 import dev.nikomaru.advancedshopfinder.files.Config
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
 import kotlinx.coroutines.Dispatchers
@@ -18,23 +18,22 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
+import org.bukkit.inventory.meta.EnchantmentStorageMeta
 import kotlin.math.hypot
 
 
 @CommandMethod("advancedshopfinder|asf|shopfinder|sf")
-class ShopFindCommand {
-    @CommandMethod("search <itemName>")
-    suspend fun searchItem(
-        sender: CommandSender,
-        @Argument(value = "itemName", suggestions = "itemName") itemName: String,
-    ) {
-        val item =
-            getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
-
+class EnchantFindCommand {
+    @CommandMethod("bookfind <enchantment>")
+    suspend fun enchantFind(sender: CommandSender, @Argument("enchantment") enchantment: Enchantment) {
         val shop = AdvancedShopFinder.quickShop.shopManager.allShops.filter {
-            it.item.type.translationKey().equals(item, true)
+            it.item.type == Material.ENCHANTED_BOOK && (it.item.itemMeta as EnchantmentStorageMeta).hasStoredEnchant(
+                enchantment
+            )
         }
+
         if (shop.isEmpty()) {
             sender.sendRichMessage("検索結果: 0件")
             return
@@ -55,10 +54,6 @@ class ShopFindCommand {
             val distance = getPlayerDistance(playerLocation, shopChest)
             val count = getBuyShopCount(shopChest)
 
-            val enchantmentList =
-                shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
-                    .joinToString("\n")
-            val enchantment = "<hover:show_text:'$enchantmentList'><light_purple>エンチャント</light_purple></hover>"
 
             val mm = MiniMessage.miniMessage()
             val tags = arrayOf(
@@ -76,7 +71,7 @@ class ShopFindCommand {
                 Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
                 Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
                 Placeholder.component("shop-type", mm.deserialize("<color:green>販売")),
-                Placeholder.component("enchantment", mm.deserialize(enchantment))
+                Placeholder.component("enchantment", mm.deserialize(""))
             )
 
             message = message.append(
@@ -99,11 +94,9 @@ class ShopFindCommand {
                 if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
             val distance = getPlayerDistance(playerLocation, shopChest)
             val count = getSellShopCount(shopChest)
-            val enchantmentList =
+            val enchant =
                 shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
                     .joinToString("\n")
-            val enchantment = "<hover:show_text:'$enchantmentList'><light_purple>エンチャント</light_purple></hover>"
-
             val mm = MiniMessage.miniMessage()
             val tags = arrayOf(
                 Placeholder.component(
@@ -120,7 +113,7 @@ class ShopFindCommand {
                 Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
                 Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
                 Placeholder.component("shop-type", mm.deserialize("<color:red>買取")),
-                Placeholder.component("enchantment", mm.deserialize(enchantment))
+                Placeholder.component("enchant", mm.deserialize(enchant))
             )
 
             message = message.append(
@@ -132,49 +125,8 @@ class ShopFindCommand {
         }
         sender.sendRichMessage("<color:green>検索結果: ${sum}件")
         sender.sendMessage(message)
-    }
 
-    companion object{
-        suspend fun getBuyShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
-            if (shopChest.isUnlimited) {
-                "無制限"
-            } else {
-                "${shopChest.remainingStock} * ${shopChest.shopStackingAmount}個"
-            }
-        }
-
-
-        fun getPlayerDistance(playerLocation: Location, shopChest: Shop) =
-            hypot(playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z).toInt()
-
-        suspend fun getSellShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
-            if (shopChest.isUnlimited) {
-                "無制限"
-            } else {
-                "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
-            }
-        }
     }
 
 
-    @Suggestions("itemName")
-    fun itemNameSuggestions(sender: CommandContext<CommandSender>, input: String?): List<String> {
-        return Material.values().map {
-            AdvancedShopFinder.translateData[it.translationKey()] ?: it.translationKey()
-        } + Material.values().map { it.name.lowercase() }
-    }
-
-
-    fun <K, V> getKey(map: Map<K, V>, value: V): K? {
-        for (key in map.keys) {
-            if (value == map[key]) {
-                return key
-            }
-        }
-        return null
-    }
-}
-
-fun getNearPlace(shopChest: Shop) = Config.config.placeData.minByOrNull {
-    hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
 }

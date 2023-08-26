@@ -1,18 +1,23 @@
 package dev.nikomaru.advancedshopfinder
 
 import cloud.commandframework.annotations.AnnotationParser
+import cloud.commandframework.arguments.parser.ParserParameters
 import cloud.commandframework.bukkit.CloudBukkitCapabilities
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator
 import cloud.commandframework.kotlin.coroutines.annotations.installCoroutineSupport
 import cloud.commandframework.meta.SimpleCommandMeta
 import cloud.commandframework.paper.PaperCommandManager
 import com.ghostchu.quickshop.api.QuickShopAPI
+import dev.nikomaru.advancedshopfinder.commands.EnchantFindCommand
 import dev.nikomaru.advancedshopfinder.commands.ReloadCommand
 import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand
 import dev.nikomaru.advancedshopfinder.files.Config
 import dev.nikomaru.advancedshopfinder.files.TranslateMap
+import dev.nikomaru.advancedshopfinder.utils.command.EnchantmentParser
+import io.leangen.geantyref.TypeToken
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
+import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -59,10 +64,17 @@ class AdvancedShopFinder : JavaPlugin() {
             SimpleCommandMeta.empty()
         }.installCoroutineSupport()
 
+        val parserRegistry = commandManager.parserRegistry()
+
+        parserRegistry.registerParserSupplier(
+            TypeToken.get(EnchantFindCommand::class.java)
+        ) { _: ParserParameters? -> EnchantmentParser() }
+
         with(annotationParser) {
             // write your command here
             parse(ShopFindCommand())
             parse(ReloadCommand())
+            parse(EnchantFindCommand())
         }
     }
 }
