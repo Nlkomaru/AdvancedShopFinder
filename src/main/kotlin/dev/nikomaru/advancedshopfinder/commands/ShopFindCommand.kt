@@ -44,7 +44,7 @@ class ShopFindCommand {
 
         val sell =
             shop.filter { it.shopType == ShopType.SELLING && (withContext(Dispatchers.minecraft) { it.remainingStock } > 0 || it.isUnlimited) }
-                .sortedBy { it.price / it.remainingStock }
+                .sortedBy { it.price / it.shopStackingAmount  }
         sell.forEach { shopChest ->
             val nearPlace = getNearPlace(shopChest)
             val nearTownDistance = hypot(
