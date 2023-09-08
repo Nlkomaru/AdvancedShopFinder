@@ -113,7 +113,7 @@ class EnchantFindCommand {
                 Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
                 Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
                 Placeholder.component("shop-type", mm.deserialize("<color:red>買取")),
-                Placeholder.component("enchant", mm.deserialize(enchant))
+                Placeholder.component("enchant", mm.deserialize(""))
             )
 
             message = message.append(

@@ -58,7 +58,7 @@ class ShopFindCommand {
             val enchantmentList =
                 shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
                     .joinToString("\n")
-            val enchantment = "<hover:show_text:'$enchantmentList'><light_purple>エンチャント</light_purple></hover>"
+            val enchantment = "<hover:show_text:'$enchantmentList'>エンチャント</hover>"
 
             val mm = MiniMessage.miniMessage()
             val tags = arrayOf(
