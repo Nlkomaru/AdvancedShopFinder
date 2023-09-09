@@ -19,6 +19,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import sun.net.www.protocol.http.AuthenticatorKeys.getKey
 import kotlin.math.hypot
 
 
@@ -32,109 +33,93 @@ class ShopFindCommand {
         val item =
             getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
 
+
         val shop = AdvancedShopFinder.quickShop.shopManager.allShops.filter {
             it.item.type.translationKey().equals(item, true)
         }
+
         if (shop.isEmpty()) {
             sender.sendRichMessage("検索結果: 0件")
             return
         }
+
         var message = Component.text("")
         var sum = 0
 
         val sell =
             shop.filter { it.shopType == ShopType.SELLING && (withContext(Dispatchers.minecraft) { it.remainingStock } > 0 || it.isUnlimited) }
-                .sortedBy { it.price / it.shopStackingAmount  }
+                .sortedBy { it.price / it.shopStackingAmount }
+
         sell.forEach { shopChest ->
-            val nearPlace = getNearPlace(shopChest)
-            val nearTownDistance = hypot(
-                nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ
-            )
-            val playerLocation =
-                if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
-            val distance = getPlayerDistance(playerLocation, shopChest)
-            val count = getBuyShopCount(shopChest)
-
-            val enchantmentList =
-                shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
-                    .joinToString("\n")
-            val enchantment = "<hover:show_text:'$enchantmentList'>エンチャント</hover>"
-
-            val mm = MiniMessage.miniMessage()
-            val tags = arrayOf(
-                Placeholder.component(
-                    "player-name", Component.text(Bukkit.getOfflinePlayer(shopChest.owner).name.toString())
-                ),
-                Placeholder.component("price", Component.text(shopChest.price.toString())),
-                Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())),
-                Placeholder.component("count", Component.text(count)),
-                Placeholder.component("world", Component.text(shopChest.location.world.name)),
-                Placeholder.component("x", Component.text(shopChest.location.blockX.toString())),
-                Placeholder.component("y", Component.text(shopChest.location.blockY.toString())),
-                Placeholder.component("z", Component.text(shopChest.location.blockZ.toString())),
-                Placeholder.component("distance", Component.text(distance.toString())),
-                Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
-                Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
-                Placeholder.component("shop-type", mm.deserialize("<color:green>販売")),
-                Placeholder.component("enchantment", mm.deserialize(enchantment))
-            )
-
-            message = message.append(
-                mm.deserialize(
-                    Config.config.format, *tags
-                )
-            )
+            message = message.append(sendShopInfo(sender, shopChest))
+            message = message.append(Component.text("\n"))
             sum++
         }
+
         val buy =
             shop.filter { it.shopType == ShopType.BUYING && (withContext(Dispatchers.minecraft) { it.remainingSpace } > 0 || it.isUnlimited) }
                 .sortedBy { -it.price / it.shopStackingAmount }
+
         buy.forEach { shopChest ->
-
-            val nearPlace = getNearPlace(shopChest)
-            val nearTownDistance = hypot(
-                nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ
-            )
-            val playerLocation =
-                if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
-            val distance = getPlayerDistance(playerLocation, shopChest)
-            val count = getSellShopCount(shopChest)
-            val enchantmentList =
-                shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
-                    .joinToString("\n")
-            val enchantment = "<hover:show_text:'$enchantmentList'><light_purple>エンチャント</light_purple></hover>"
-
-            val mm = MiniMessage.miniMessage()
-            val tags = arrayOf(
-                Placeholder.component(
-                    "player-name", Component.text(Bukkit.getOfflinePlayer(shopChest.owner).name.toString())
-                ),
-                Placeholder.component("price", Component.text(shopChest.price.toString())),
-                Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())),
-                Placeholder.component("count", Component.text(count)),
-                Placeholder.component("world", Component.text(shopChest.location.world.name)),
-                Placeholder.component("x", Component.text(shopChest.location.blockX.toString())),
-                Placeholder.component("y", Component.text(shopChest.location.blockY.toString())),
-                Placeholder.component("z", Component.text(shopChest.location.blockZ.toString())),
-                Placeholder.component("distance", Component.text(distance.toString())),
-                Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
-                Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
-                Placeholder.component("shop-type", mm.deserialize("<color:red>買取")),
-                Placeholder.component("enchantment", mm.deserialize(enchantment))
-            )
-
-            message = message.append(
-                mm.deserialize(
-                    Config.config.format, *tags
-                )
-            )
+            message = message.append(sendShopInfo(sender, shopChest))
+            message = message.append(Component.text("\n"))
             sum++
         }
+
+
         sender.sendRichMessage("<color:green>検索結果: ${sum}件")
         sender.sendMessage(message)
     }
 
-    companion object{
+    private suspend fun sendShopInfo(sender: CommandSender, shopChest: Shop): Component {
+        val nearPlace = getNearPlace(shopChest)
+        val nearTownDistance = hypot(
+            nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ
+        )
+        val playerLocation =
+            if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
+        val distance = getPlayerDistance(playerLocation, shopChest)
+        val count = if (shopChest.isBuying) getBuyShopCount(shopChest) else getSellShopCount(shopChest)
+
+        val enchantmentList =
+            shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
+
+        val enchantment = if (enchantmentList.isEmpty()) {
+            ""
+        } else {
+            "<hover:show_text:'${enchantmentList.joinToString("\n")}'>エンチャント</hover>"
+        }
+
+        val mm = MiniMessage.miniMessage()
+        val tags = arrayOf(
+            Placeholder.component(
+                "player-name", if (shopChest.isUnlimited) {
+                    Component.text("アドミンショップ")
+                } else {
+                    Component.text(Bukkit.getOfflinePlayer(shopChest.owner).name.toString())
+                }
+            ),
+            Placeholder.component("price", Component.text(shopChest.price.toString())),
+            Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())),
+            Placeholder.component("count", Component.text(count)),
+            Placeholder.component("world", Component.text(shopChest.location.world.name)),
+            Placeholder.component("x", Component.text(shopChest.location.blockX.toString())),
+            Placeholder.component("y", Component.text(shopChest.location.blockY.toString())),
+            Placeholder.component("z", Component.text(shopChest.location.blockZ.toString())),
+            Placeholder.component("distance", Component.text(distance.toString())),
+            Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
+            Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
+            Placeholder.component(
+                "shop-type", mm.deserialize(if (shopChest.isBuying) "<color:red>買取" else "<color:green>販売")
+            ),
+            Placeholder.component("enchantment", mm.deserialize(enchantment))
+        )
+
+        return mm.deserialize(Config.config.format, *tags)
+    }
+
+
+    companion object {
         suspend fun getBuyShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
             if (shopChest.isUnlimited) {
                 "無制限"
