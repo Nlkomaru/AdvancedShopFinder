@@ -79,7 +79,7 @@ class ShopFindCommand {
         val playerLocation =
             if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
         val distance = getPlayerDistance(playerLocation, shopChest)
-        val count = if (shopChest.isBuying) getBuyShopCount(shopChest) else getSellShopCount(shopChest)
+        val count = if (shopChest.isBuying) getBuyingShopCount(shopChest) else getSellingShopCount(shopChest)
 
         val enchantmentList =
             shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
@@ -120,7 +120,7 @@ class ShopFindCommand {
 
 
     companion object {
-        suspend fun getBuyShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
+        suspend fun getSellingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
             if (shopChest.isUnlimited) {
                 "無制限"
             } else {
@@ -132,7 +132,7 @@ class ShopFindCommand {
         fun getPlayerDistance(playerLocation: Location, shopChest: Shop) =
             hypot(playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z).toInt()
 
-        suspend fun getSellShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
+        suspend fun getBuyingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
             if (shopChest.isUnlimited) {
                 "無制限"
             } else {
