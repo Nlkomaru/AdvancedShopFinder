@@ -4,9 +4,9 @@ import cloud.commandframework.annotations.Argument
 import cloud.commandframework.annotations.CommandMethod
 import com.ghostchu.quickshop.api.shop.ShopType
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
-import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getBuyShopCount
+import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getBuyingShopCount
 import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getPlayerDistance
-import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getSellShopCount
+import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getSellingShopCount
 import dev.nikomaru.advancedshopfinder.files.Config
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,7 @@ class EnchantFindCommand {
             val playerLocation =
                 if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
             val distance = getPlayerDistance(playerLocation, shopChest)
-            val count = getBuyShopCount(shopChest)
+            val count = getSellingShopCount(shopChest)
 
 
             val mm = MiniMessage.miniMessage()
@@ -93,10 +93,7 @@ class EnchantFindCommand {
             val playerLocation =
                 if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
             val distance = getPlayerDistance(playerLocation, shopChest)
-            val count = getSellShopCount(shopChest)
-            val enchant =
-                shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
-                    .joinToString("\n")
+            val count = getBuyingShopCount(shopChest)
             val mm = MiniMessage.miniMessage()
             val tags = arrayOf(
                 Placeholder.component(
