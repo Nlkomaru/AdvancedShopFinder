@@ -1,14 +1,16 @@
 package dev.nikomaru.advancedshopfinder.commands
 
-import cloud.commandframework.annotations.CommandMethod
-import cloud.commandframework.annotations.CommandPermission
+
 import dev.nikomaru.advancedshopfinder.files.Config
 import org.bukkit.command.CommandSender
+import revxrsal.commands.annotation.Command
+import revxrsal.commands.annotation.Subcommand
+import revxrsal.commands.bukkit.annotation.CommandPermission
 
-@CommandMethod("advancedshopfinder|asf|shopfinder|sf")
+@Command("advancedshopfinder", "asf", "shopfinder", "sf")
 @CommandPermission("advancedshopfinder.admin")
 class ReloadCommand {
-    @CommandMethod("reload")
+    @Subcommand("reload")
     fun reload(sender: CommandSender) {
         Config.loadConfig()
         sender.sendRichMessage("<color:green>コンフィグをリロードしました")

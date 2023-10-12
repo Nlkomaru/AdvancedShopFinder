@@ -1,25 +1,23 @@
 package dev.nikomaru.advancedshopfinder
 
-import cloud.commandframework.annotations.AnnotationParser
-import cloud.commandframework.arguments.parser.ParserParameters
-import cloud.commandframework.bukkit.CloudBukkitCapabilities
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator
-import cloud.commandframework.kotlin.coroutines.annotations.installCoroutineSupport
-import cloud.commandframework.meta.SimpleCommandMeta
-import cloud.commandframework.paper.PaperCommandManager
 import com.ghostchu.quickshop.api.QuickShopAPI
 import dev.nikomaru.advancedshopfinder.commands.EnchantFindCommand
 import dev.nikomaru.advancedshopfinder.commands.ReloadCommand
 import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand
 import dev.nikomaru.advancedshopfinder.files.Config
 import dev.nikomaru.advancedshopfinder.files.TranslateMap
-import dev.nikomaru.advancedshopfinder.utils.command.EnchantmentParser
-import io.leangen.geantyref.TypeToken
+import dev.nikomaru.advancedshopfinder.utils.command.EnchantmentParser.enchantmentSupport
+import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
-import org.bukkit.Location
-import org.bukkit.command.CommandSender
+import org.bukkit.Material
 import org.bukkit.plugin.java.JavaPlugin
+import revxrsal.commands.autocomplete.SuggestionProvider
+import revxrsal.commands.bukkit.BukkitCommandHandler
+import revxrsal.commands.command.CommandActor
+import revxrsal.commands.command.CommandParameter
+import revxrsal.commands.command.ExecutableCommand
+import revxrsal.commands.ktx.supportSuspendFunctions
 
 
 class AdvancedShopFinder : JavaPlugin() {
@@ -49,32 +47,32 @@ class AdvancedShopFinder : JavaPlugin() {
     }
 
     private fun setCommand() {
-        val commandManager: PaperCommandManager<CommandSender> = PaperCommandManager(
-            plugin,
-            AsynchronousCommandExecutionCoordinator.builder<CommandSender>().build(),
-            java.util.function.Function.identity(),
-            java.util.function.Function.identity()
-        )
 
-        if (commandManager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
-            commandManager.registerAsynchronousCompletions()
+        val handler = BukkitCommandHandler.create(this)
+
+        handler.setSwitchPrefix("--")
+        handler.supportSuspendFunctions()
+        //Enchantment
+        handler.enchantmentSupport()
+
+        handler.autoCompleter.registerSuggestionFactory { parameter: CommandParameter ->
+            if (parameter.hasAnnotation(ItemNameSuggestion::class.java)) {
+                return@registerSuggestionFactory SuggestionProvider { _: List<String>, _: CommandActor, _: ExecutableCommand ->
+                    Material.values().map {
+                        translateData[it.translationKey()] ?: it.translationKey()
+                    } + Material.values().map { it.name.lowercase() }
+                }
+            }
+            null // Parameter does not have @WithPermission, ignore it.
         }
 
-        val annotationParser = AnnotationParser(commandManager, CommandSender::class.java) {
-            SimpleCommandMeta.empty()
-        }.installCoroutineSupport()
 
-        val parserRegistry = commandManager.parserRegistry()
 
-        parserRegistry.registerParserSupplier(
-            TypeToken.get(EnchantFindCommand::class.java)
-        ) { _: ParserParameters? -> EnchantmentParser() }
-
-        with(annotationParser) {
+        with(handler) {
             // write your command here
-            parse(ShopFindCommand())
-            parse(ReloadCommand())
-            parse(EnchantFindCommand())
+            register(ShopFindCommand())
+            register(ReloadCommand())
+            register(EnchantFindCommand())
         }
     }
 }

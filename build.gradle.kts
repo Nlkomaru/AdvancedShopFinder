@@ -23,9 +23,9 @@ repositories {
 val paperVersion = "1.20.1-R0.1-SNAPSHOT"
 val cloudVersion = "1.8.3"
 val vaultVersion = "1.7"
-val mccoroutineVersion = "2.11.0"
+val mccoroutineVersion = "2.13.0"
 val quickShopVersion = "4.2.2.9"
-val lampVersion = "3.1.5"
+val lampVersion = "3.1.7"
 
 dependencies {
     compileOnly("io.papermc.paper", "paper-api", paperVersion)
@@ -37,15 +37,10 @@ dependencies {
     compileOnly("com.ghostchu", "quickshop-bukkit", quickShopVersion)
     compileOnly("com.ghostchu", "quickshop-api", quickShopVersion)
 
-    implementation("cloud.commandframework", "cloud-core", cloudVersion)
-    implementation("cloud.commandframework", "cloud-kotlin-extensions", cloudVersion)
-    implementation("cloud.commandframework", "cloud-paper", cloudVersion)
-    implementation("cloud.commandframework", "cloud-brigadier", cloudVersion)
-    implementation("cloud.commandframework", "cloud-annotations", cloudVersion)
-    implementation("cloud.commandframework", "cloud-kotlin-coroutines-annotations", cloudVersion)
-    implementation("cloud.commandframework", "cloud-kotlin-coroutines", cloudVersion)
+    implementation("com.github.Revxrsal.Lamp","common",lampVersion)
+    implementation("com.github.Revxrsal.Lamp","bukkit",lampVersion)
 
-    library("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.7.1")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.7.3")
     implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json", "1.5.1")
 
     library("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-api", mccoroutineVersion)

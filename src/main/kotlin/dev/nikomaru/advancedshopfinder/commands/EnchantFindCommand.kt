@@ -1,7 +1,5 @@
 package dev.nikomaru.advancedshopfinder.commands
 
-import cloud.commandframework.annotations.Argument
-import cloud.commandframework.annotations.CommandMethod
 import com.ghostchu.quickshop.api.shop.ShopType
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand.Companion.getBuyingShopCount
@@ -21,13 +19,15 @@ import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.EnchantmentStorageMeta
+import revxrsal.commands.annotation.Command
+import revxrsal.commands.annotation.Subcommand
 import kotlin.math.hypot
 
 
-@CommandMethod("advancedshopfinder|asf|shopfinder|sf")
+@Command("advancedshopfinder", "asf", "shopfinder", "sf")
 class EnchantFindCommand {
-    @CommandMethod("bookfind <enchantment>")
-    suspend fun enchantFind(sender: CommandSender, @Argument("enchantment") enchantment: Enchantment) {
+    @Subcommand("bookfind")
+    suspend fun enchantFind(sender: CommandSender, enchantment: Enchantment) {
         val shop = AdvancedShopFinder.quickShop.shopManager.allShops.filter {
             it.item.type == Material.ENCHANTED_BOOK && (it.item.itemMeta as EnchantmentStorageMeta).hasStoredEnchant(
                 enchantment

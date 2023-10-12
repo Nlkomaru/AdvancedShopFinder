@@ -1,13 +1,10 @@
 package dev.nikomaru.advancedshopfinder.commands
 
-import cloud.commandframework.annotations.Argument
-import cloud.commandframework.annotations.CommandMethod
-import cloud.commandframework.annotations.suggestions.Suggestions
-import cloud.commandframework.context.CommandContext
 import com.ghostchu.quickshop.api.shop.Shop
 import com.ghostchu.quickshop.api.shop.ShopType
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.files.Config
+import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,16 +16,20 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import sun.net.www.protocol.http.AuthenticatorKeys.getKey
+import revxrsal.commands.annotation.Command
+import revxrsal.commands.annotation.Subcommand
+import revxrsal.commands.annotation.Switch
 import kotlin.math.hypot
 
 
-@CommandMethod("advancedshopfinder|asf|shopfinder|sf")
+@Command("advancedshopfinder", "asf", "shopfinder", "sf")
 class ShopFindCommand {
-    @CommandMethod("search <itemName>")
+    @Subcommand("search")
     suspend fun searchItem(
         sender: CommandSender,
-        @Argument(value = "itemName", suggestions = "itemName") itemName: String,
+        @ItemNameSuggestion itemName: String,
+        @Switch("disable-buying-chest") disableBuy: Boolean,
+        @Switch("disable-selling-chest") disableSell: Boolean
     ) {
         val item =
             getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
@@ -46,24 +47,28 @@ class ShopFindCommand {
         var message = Component.text("")
         var sum = 0
 
-        val sell =
-            shop.filter { it.shopType == ShopType.SELLING && (withContext(Dispatchers.minecraft) { it.remainingStock } > 0 || it.isUnlimited) }
-                .sortedBy { it.price / it.shopStackingAmount }
+        if (!disableSell) {
+            val sell =
+                shop.filter { it.shopType == ShopType.SELLING && (withContext(Dispatchers.minecraft) { it.remainingStock } > 0 || it.isUnlimited) }
+                    .sortedBy { it.price / it.shopStackingAmount }
 
-        sell.forEach { shopChest ->
-            message = message.append(sendShopInfo(sender, shopChest))
-            message = message.append(Component.text("\n"))
-            sum++
+            sell.forEach { shopChest ->
+                message = message.append(sendShopInfo(sender, shopChest))
+                message = message.append(Component.text("\n"))
+                sum++
+            }
         }
 
-        val buy =
-            shop.filter { it.shopType == ShopType.BUYING && (withContext(Dispatchers.minecraft) { it.remainingSpace } > 0 || it.isUnlimited) }
-                .sortedBy { -it.price / it.shopStackingAmount }
+        if (!disableBuy){
+            val buy =
+                shop.filter { it.shopType == ShopType.BUYING && (withContext(Dispatchers.minecraft) { it.remainingSpace } > 0 || it.isUnlimited) }
+                    .sortedBy { -it.price / it.shopStackingAmount }
 
-        buy.forEach { shopChest ->
-            message = message.append(sendShopInfo(sender, shopChest))
-            message = message.append(Component.text("\n"))
-            sum++
+            buy.forEach { shopChest ->
+                message = message.append(sendShopInfo(sender, shopChest))
+                message = message.append(Component.text("\n"))
+                sum++
+            }
         }
 
 
@@ -82,7 +87,7 @@ class ShopFindCommand {
         val count = if (shopChest.isBuying) getBuyingShopCount(shopChest) else getSellingShopCount(shopChest)
 
         val enchantmentList =
-            shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}><lang:enchantment.level.${it.value}>" }
+            shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}> <lang:enchantment.level.${it.value}>" }
 
         val enchantment = if (enchantmentList.isEmpty()) {
             ""
@@ -139,14 +144,6 @@ class ShopFindCommand {
                 "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
             }
         }
-    }
-
-
-    @Suggestions("itemName")
-    fun itemNameSuggestions(sender: CommandContext<CommandSender>, input: String?): List<String> {
-        return Material.values().map {
-            AdvancedShopFinder.translateData[it.translationKey()] ?: it.translationKey()
-        } + Material.values().map { it.name.lowercase() }
     }
 
 
