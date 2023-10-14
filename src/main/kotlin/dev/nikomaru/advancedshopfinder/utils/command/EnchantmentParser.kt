@@ -14,7 +14,6 @@ object EnchantmentParser : ValueResolver<Enchantment> {
     }
 
     override fun resolve(context: ValueResolver.ValueResolverContext): Enchantment {
-
         val enchantment = context.arguments().pop()?.let { Enchantment.getByKey(NamespacedKey.minecraft(it)) }
         return enchantment ?: throw IllegalArgumentException("Enchantment not found")
     }
@@ -26,7 +25,6 @@ object EnchantmentParser : ValueResolver<Enchantment> {
         ) { _: List<String>, _: CommandActor, _: ExecutableCommand ->
             suggestions()
         }
-
         handler.registerValueResolver(Enchantment::class.java, this@EnchantmentParser)
     }
 }

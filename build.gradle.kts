@@ -19,6 +19,7 @@ repositories {
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.incendo.org/content/repositories/snapshots")
     maven("https://repo.codemc.io/repository/maven-public/")
+    maven("https://repo.dmulloy2.net/repository/public/" )
 }
 val paperVersion = "1.20.1-R0.1-SNAPSHOT"
 val cloudVersion = "1.8.3"
@@ -34,6 +35,8 @@ dependencies {
 
     compileOnly("com.github.MilkBowl", "VaultAPI", vaultVersion)
 
+    compileOnly("com.comphenix.protocol", "ProtocolLib", "5.1.0")
+
     compileOnly("com.ghostchu", "quickshop-bukkit", quickShopVersion)
     compileOnly("com.ghostchu", "quickshop-api", quickShopVersion)
 
@@ -43,8 +46,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.7.3")
     implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json", "1.5.1")
 
-    library("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-api", mccoroutineVersion)
-    library("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-core", mccoroutineVersion)
+    implementation("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-api", mccoroutineVersion)
+    implementation("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-core", mccoroutineVersion)
+
 }
 
 java {

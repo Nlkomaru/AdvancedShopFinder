@@ -2,11 +2,17 @@ package dev.nikomaru.advancedshopfinder.commands
 
 import com.ghostchu.quickshop.api.shop.Shop
 import com.ghostchu.quickshop.api.shop.ShopType
+import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
+import dev.nikomaru.advancedshopfinder.AdvancedShopFinder.Companion.plugin
 import dev.nikomaru.advancedshopfinder.files.Config
 import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
+import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
+import dev.nikomaru.advancedshopfinder.utils.display.LuminescenceShulker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -16,10 +22,9 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import revxrsal.commands.annotation.Command
-import revxrsal.commands.annotation.Subcommand
-import revxrsal.commands.annotation.Switch
+import revxrsal.commands.annotation.*
 import kotlin.math.hypot
+import kotlin.math.min
 
 
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
@@ -29,7 +34,12 @@ class ShopFindCommand {
         sender: CommandSender,
         @ItemNameSuggestion itemName: String,
         @Switch("disable-buying-chest") disableBuy: Boolean,
-        @Switch("disable-selling-chest") disableSell: Boolean
+        @Switch("disable-selling-chest") disableSell: Boolean,
+        @Switch("disable-lighting") disableLightning: Boolean,
+        @Flag("lightning-time") @Default("1000") @Range(min= 1.0 ) lightningTime: Long,
+        @Flag("lightning-interval") @Default("500") @Range(min= 1.0)lightningInterval: Long,
+        @Flag("lightning-count") @Default("5") @Range(min= 1.0)lightningCount: Int,
+        @Flag("lightning-distance") @Default("200") @Range(min= 1.0) lightningDistance: Int,
     ) {
         val item =
             getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
@@ -57,9 +67,27 @@ class ShopFindCommand {
                 message = message.append(Component.text("\n"))
                 sum++
             }
+
+            if (!disableLightning && sender is Player) {
+                plugin.launch {
+                    async(Dispatchers.async) {
+                        val luminescenceShulker = LuminescenceShulker()
+                        luminescenceShulker.addTarget(sender)
+                        sell.stream().filter { getPlayerDistance(sender.location, it) < lightningDistance }.forEach {
+                            luminescenceShulker.addBlock(it.location)
+                        }
+                        repeat(lightningCount) {
+                            luminescenceShulker.display()
+                            delay(lightningTime)
+                            luminescenceShulker.stop()
+                            delay(lightningInterval)
+                        }
+                    }
+                }
+            }
         }
 
-        if (!disableBuy){
+        if (!disableBuy) {
             val buy =
                 shop.filter { it.shopType == ShopType.BUYING && (withContext(Dispatchers.minecraft) { it.remainingSpace } > 0 || it.isUnlimited) }
                     .sortedBy { -it.price / it.shopStackingAmount }
@@ -69,8 +97,26 @@ class ShopFindCommand {
                 message = message.append(Component.text("\n"))
                 sum++
             }
-        }
 
+
+            if (!disableLightning && sender is Player) {
+                plugin.launch {
+                    async(Dispatchers.async) {
+                        val luminescenceShulker = LuminescenceShulker()
+                        luminescenceShulker.addTarget(sender)
+                        buy.stream().filter { getPlayerDistance(sender.location, it) < lightningDistance }.forEach {
+                            luminescenceShulker.addBlock(it.location)
+                        }
+                        repeat(lightningCount) {
+                            luminescenceShulker.display()
+                            delay(lightningTime)
+                            luminescenceShulker.stop()
+                            delay(lightningInterval)
+                        }
+                    }
+                }
+            }
+        }
 
         sender.sendRichMessage("<color:green>検索結果: ${sum}件")
         sender.sendMessage(message)
