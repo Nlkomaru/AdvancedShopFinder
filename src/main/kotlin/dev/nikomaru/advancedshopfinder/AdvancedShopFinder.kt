@@ -5,6 +5,7 @@ import com.comphenix.protocol.ProtocolManager
 import com.ghostchu.quickshop.api.QuickShopAPI
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import dev.nikomaru.advancedshopfinder.commands.EnchantFindCommand
+import dev.nikomaru.advancedshopfinder.commands.HelpCommand
 import dev.nikomaru.advancedshopfinder.commands.ReloadCommand
 import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand
 import dev.nikomaru.advancedshopfinder.files.Config
@@ -58,8 +59,9 @@ class AdvancedShopFinder : SuspendingJavaPlugin() {
         val handler = BukkitCommandHandler.create(this)
 
         handler.setSwitchPrefix("--")
+        handler.setFlagPrefix("--")
         handler.supportSuspendFunctions()
-        handler.registerBrigadier()
+
         //Enchantment
         handler.enchantmentSupport()
         //Material
@@ -76,10 +78,27 @@ class AdvancedShopFinder : SuspendingJavaPlugin() {
             null
         }
 
+        handler.setHelpWriter { command, actor ->
+            java.lang.String.format(
+                """
+                <color:yellow>コマンド: <color:gray>%s
+                <color:yellow>使用方法: <color:gray>%s
+                <color:yellow>説明: <color:gray>%s
+                
+                """.trimIndent(),
+                command.path.toList(),
+                command.usage,
+                command.description,
+            )
+        }
+
+
         with(handler) {
             register(ShopFindCommand())
             register(ReloadCommand())
             register(EnchantFindCommand())
+            register(HelpCommand())
         }
+        handler.registerBrigadier()
     }
 }

@@ -147,7 +147,7 @@ class ShopFindCommand {
                 "player-name", if (shopChest.isUnlimited) {
                     Component.text("アドミンショップ")
                 } else {
-                    Component.text(Bukkit.getOfflinePlayer(shopChest.owner).name.toString())
+                    Component.text(Bukkit.getOfflinePlayer(shopChest.owner.uniqueId!!).name.toString())
                 }
             ),
             Placeholder.component("price", Component.text(shopChest.price.toString())),

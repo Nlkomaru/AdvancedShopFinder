@@ -58,7 +58,7 @@ class EnchantFindCommand {
             val mm = MiniMessage.miniMessage()
             val tags = arrayOf(
                 Placeholder.component(
-                    "player-name", Component.text(Bukkit.getOfflinePlayer(shopChest.owner).name.toString())
+                    "player-name", Component.text(Bukkit.getOfflinePlayer(shopChest.owner.uniqueId!!).name.toString())
                 ),
                 Placeholder.component("price", Component.text(shopChest.price.toString())),
                 Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())),
@@ -97,7 +97,7 @@ class EnchantFindCommand {
             val mm = MiniMessage.miniMessage()
             val tags = arrayOf(
                 Placeholder.component(
-                    "player-name", Component.text(Bukkit.getOfflinePlayer(shopChest.owner).name.toString())
+                    "player-name", Component.text(Bukkit.getOfflinePlayer(shopChest.owner.uniqueId!!).name.toString())
                 ),
                 Placeholder.component("price", Component.text(shopChest.price.toString())),
                 Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())),

@@ -25,7 +25,7 @@ val paperVersion = "1.20.1-R0.1-SNAPSHOT"
 val cloudVersion = "1.8.3"
 val vaultVersion = "1.7"
 val mccoroutineVersion = "2.13.0"
-val quickShopVersion = "4.2.2.9"
+val quickShopVersion = "5.2.0.5"
 val lampVersion = "3.1.7"
 
 dependencies {
