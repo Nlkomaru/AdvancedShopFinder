@@ -74,7 +74,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks {
     runServer {
-        minecraftVersion("1.20.1")
+        minecraftVersion("1.20.2")
     }
 }
 
@@ -87,7 +87,7 @@ bukkit {
 
     main = "$group.advancedshopfinder.AdvancedShopFinder"  // need to change
 
-    depend = listOf("QuickShop-Hikari") // need to change
+    depend = listOf("QuickShop-Hikari","ProtocolLib") // need to change
 
     apiVersion = "1.20"
     libraries = listOf(

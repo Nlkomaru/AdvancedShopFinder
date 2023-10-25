@@ -120,7 +120,7 @@ class EnchantFindCommand {
             )
             sum++
         }
-        sender.sendRichMessage("<color:green>検索結果: ${sum}件")
+        sender.sendRichMessage("<color:green><lang:${enchantment.translationKey()}>のエンチャント本の検索結果: ${sum}件")
         sender.sendMessage(message)
 
     }

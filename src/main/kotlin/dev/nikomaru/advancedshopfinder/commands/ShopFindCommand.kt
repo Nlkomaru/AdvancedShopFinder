@@ -24,7 +24,6 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import revxrsal.commands.annotation.*
 import kotlin.math.hypot
-import kotlin.math.min
 
 
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
@@ -36,10 +35,10 @@ class ShopFindCommand {
         @Switch("disable-buying-chest") disableBuy: Boolean,
         @Switch("disable-selling-chest") disableSell: Boolean,
         @Switch("disable-lighting") disableLightning: Boolean,
-        @Flag("lightning-time") @Default("1000") @Range(min= 1.0 ) lightningTime: Long,
-        @Flag("lightning-interval") @Default("500") @Range(min= 1.0)lightningInterval: Long,
-        @Flag("lightning-count") @Default("5") @Range(min= 1.0)lightningCount: Int,
-        @Flag("lightning-distance") @Default("200") @Range(min= 1.0) lightningDistance: Int,
+        @Flag("lightning-time") @Default("1000") @Range(min = 1.0) lightningTime: Long,
+        @Flag("lightning-interval") @Default("500") @Range(min = 1.0) lightningInterval: Long,
+        @Flag("lightning-count") @Default("5") @Range(min = 1.0) lightningCount: Int,
+        @Flag("lightning-distance") @Default("200") @Range(min = 1.0) lightningDistance: Int,
     ) {
         val item =
             getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
@@ -118,7 +117,7 @@ class ShopFindCommand {
             }
         }
 
-        sender.sendRichMessage("<color:green>検索結果: ${sum}件")
+        sender.sendRichMessage("<color:green><lang:${item}> の検索結果: ${sum}件")
         sender.sendMessage(message)
     }
 
@@ -165,8 +164,17 @@ class ShopFindCommand {
             ),
             Placeholder.component("enchantment", mm.deserialize(enchantment))
         )
+        val item = shopChest.item
 
-        return mm.deserialize(Config.config.format, *tags)
+        val message = mm.deserialize(Config.config.format, *tags)
+
+        return mm.deserialize(
+            "<hover:show_item:${item.type.name.lowercase()}:${item.amount}:'${item.itemMeta.asString}'>${
+                mm.serialize(
+                    message
+                )
+            }"
+        )
     }
 
 
