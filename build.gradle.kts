@@ -30,7 +30,7 @@ dependencies {
     val coroutineVersion = "1.7.3"
     val serializationVersion = "1.6.2"
     val vaultVersion = "1.7"
-    val quickShopVersion = "5.2.0.5"
+    val quickShopVersion = "5.2.0.6"
 
     compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
