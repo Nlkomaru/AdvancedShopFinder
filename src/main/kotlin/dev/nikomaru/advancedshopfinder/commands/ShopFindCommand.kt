@@ -6,9 +6,12 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder.Companion.plugin
 import dev.nikomaru.advancedshopfinder.files.Config
+import dev.nikomaru.advancedshopfinder.files.PlaceData
 import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
+import dev.nikomaru.advancedshopfinder.utils.data.FindOptions
+import dev.nikomaru.advancedshopfinder.utils.data.SortType
 import dev.nikomaru.advancedshopfinder.utils.display.LuminescenceShulker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -17,6 +20,7 @@ import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -27,22 +31,34 @@ import kotlin.math.hypot
 
 
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
-class ShopFindCommand {
+object ShopFindCommand {
     @Subcommand("search")
+    @Description("アイテムを検索します")
     suspend fun searchItem(
         sender: CommandSender,
         @ItemNameSuggestion itemName: String,
-        @Switch("disable-buying-chest") disableBuy: Boolean,
-        @Switch("disable-selling-chest") disableSell: Boolean,
-        @Switch("disable-lighting") disableLightning: Boolean,
+        @Flag("sort-type") @Default("ASC_PRICE_PER_ITEM") sortType: SortType,
         @Flag("lightning-time") @Default("1000") @Range(min = 1.0) lightningTime: Long,
         @Flag("lightning-interval") @Default("500") @Range(min = 1.0) lightningInterval: Long,
         @Flag("lightning-count") @Default("5") @Range(min = 1.0) lightningCount: Int,
         @Flag("lightning-distance") @Default("200") @Range(min = 1.0) lightningDistance: Int,
+        @Switch("disable-buying-chest") disableBuy: Boolean,
+        @Switch("disable-selling-chest") disableSell: Boolean,
+        @Switch("disable-lighting") disableLightning: Boolean,
     ) {
         val item =
             getKey(AdvancedShopFinder.translateData, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
 
+        val options = FindOptions(
+            sortType,
+            disableBuy,
+            disableSell,
+            disableLightning,
+            lightningTime,
+            lightningInterval,
+            lightningCount,
+            lightningDistance
+        )
 
         val shop = AdvancedShopFinder.quickShop.shopManager.allShops.filter {
             it.item.type.translationKey().equals(item, true)
@@ -53,72 +69,86 @@ class ShopFindCommand {
             return
         }
 
-        var message = Component.text("")
+        var message: Component = Component.text("")
         var sum = 0
 
         if (!disableSell) {
-            val sell =
-                shop.filter { it.shopType == ShopType.SELLING && (withContext(Dispatchers.minecraft) { it.remainingStock } > 0 || it.isUnlimited) }
-                    .sortedBy { it.price / it.shopStackingAmount }
-
-            sell.forEach { shopChest ->
-                message = message.append(sendShopInfo(sender, shopChest))
-                message = message.append(Component.text("\n"))
-                sum++
-            }
-
-            if (!disableLightning && sender is Player) {
-                plugin.launch {
-                    async(Dispatchers.async) {
-                        val luminescenceShulker = LuminescenceShulker()
-                        luminescenceShulker.addTarget(sender)
-                        sell.stream().filter { getPlayerDistance(sender.location, it) < lightningDistance }.forEach {
-                            luminescenceShulker.addBlock(it.location)
-                        }
-                        repeat(lightningCount) {
-                            luminescenceShulker.display()
-                            delay(lightningTime)
-                            luminescenceShulker.stop()
-                            delay(lightningInterval)
-                        }
-                    }
-                }
-            }
+            val (newMessage, newSum) = processShops(
+                shop, sender, message, sum, options, ShopType.SELLING
+            )
+            message = newMessage
+            sum = newSum
         }
 
         if (!disableBuy) {
-            val buy =
-                shop.filter { it.shopType == ShopType.BUYING && (withContext(Dispatchers.minecraft) { it.remainingSpace } > 0 || it.isUnlimited) }
-                    .sortedBy { -it.price / it.shopStackingAmount }
-
-            buy.forEach { shopChest ->
-                message = message.append(sendShopInfo(sender, shopChest))
-                message = message.append(Component.text("\n"))
-                sum++
-            }
-
-
-            if (!disableLightning && sender is Player) {
-                plugin.launch {
-                    async(Dispatchers.async) {
-                        val luminescenceShulker = LuminescenceShulker()
-                        luminescenceShulker.addTarget(sender)
-                        buy.stream().filter { getPlayerDistance(sender.location, it) < lightningDistance }.forEach {
-                            luminescenceShulker.addBlock(it.location)
-                        }
-                        repeat(lightningCount) {
-                            luminescenceShulker.display()
-                            delay(lightningTime)
-                            luminescenceShulker.stop()
-                            delay(lightningInterval)
-                        }
-                    }
-                }
-            }
+            val (newMessage, newSum) = processShops(
+                shop, sender, message, sum, options, ShopType.BUYING
+            )
+            message = newMessage
+            sum = newSum
         }
 
         sender.sendRichMessage("<color:green><lang:${item}> の検索結果: ${sum}件")
         sender.sendMessage(message)
+    }
+
+    suspend fun processShops(
+        shop: List<Shop>, sender: CommandSender, message: Component, sum: Int, options: FindOptions, shopType: ShopType
+    ): Pair<Component, Int> {
+        var filteredShops = shop.filter {
+            it.shopType == shopType && (withContext(Dispatchers.minecraft) {
+                if (shopType == ShopType.SELLING) it.remainingStock else it.remainingSpace
+            } > 0 || it.isUnlimited)
+        }
+
+        if (sender !is Player) {
+            filteredShops = filteredShops.sortedBy { it.price / it.shopStackingAmount }
+        } else {
+            filteredShops =  when (options.sortType) {
+                SortType.ASC_PRICE_PER_STACK -> filteredShops.sortedBy { it.price }
+                SortType.DESC_PRICE_PER_STACK -> filteredShops.sortedByDescending { it.price }
+                SortType.ASC_PRICE_PER_ITEM -> filteredShops.sortedBy { it.price / it.shopStackingAmount }
+                SortType.DESC_PRICE_PER_ITEM -> filteredShops.sortedByDescending { it.price / it.shopStackingAmount }
+                SortType.ASC_DISTANCE -> filteredShops.sortedBy { getPlayerDistance(sender.location, it) }
+                SortType.DESC_DISTANCE -> filteredShops.sortedByDescending { getPlayerDistance(sender.location, it) }
+                SortType.ASC_DISTANCE_NEAREST -> filteredShops.sortedBy { getNearestPlaceDistance(it) }
+                SortType.DESC_DISTANCE_NEAREST -> filteredShops.sortedByDescending {
+                    getNearestPlaceDistance(
+                        it
+                    )
+                }
+            }
+        }
+
+        var newMessage = message
+        var newSum = sum
+
+        filteredShops.forEach { shopChest ->
+            newMessage = newMessage.append(sendShopInfo(sender, shopChest))
+            newMessage = newMessage.append(Component.text("\n"))
+            newSum++
+        }
+
+        if (!options.disablingLighting && sender is Player) {
+            plugin.launch {
+                async(Dispatchers.async) {
+                    val luminescenceShulker = LuminescenceShulker()
+                    luminescenceShulker.addTarget(sender)
+                    filteredShops.stream().filter { getPlayerDistance(sender.location, it) < options.lightningDistance }
+                        .forEach {
+                            luminescenceShulker.addBlock(it.location)
+                        }
+                    repeat(options.lightningCount) {
+                        luminescenceShulker.display()
+                        delay(options.lightningTime)
+                        luminescenceShulker.stop()
+                        delay(options.lightningInterval)
+                    }
+                }
+            }
+        }
+
+        return Pair(newMessage, newSum)
     }
 
     private suspend fun sendShopInfo(sender: CommandSender, shopChest: Shop): Component {
@@ -131,17 +161,33 @@ class ShopFindCommand {
         val distance = getPlayerDistance(playerLocation, shopChest)
         val count = if (shopChest.isBuying) getBuyingShopCount(shopChest) else getSellingShopCount(shopChest)
 
-        val enchantmentList =
-            shopChest.item.enchantments.map { "<lang:${it.key.translationKey()}> <lang:enchantment.level.${it.value}>" }
-
-        val enchantment = if (enchantmentList.isEmpty()) {
-            ""
-        } else {
-            "<hover:show_text:'${enchantmentList.joinToString("\n")}'>エンチャント</hover>"
-        }
+        val tags = getTags(shopChest, count, distance, nearPlace, nearTownDistance)
+        val item = shopChest.item
 
         val mm = MiniMessage.miniMessage()
-        val tags = arrayOf(
+        val message = mm.deserialize(Config.config.format, *tags)
+
+        return mm.deserialize(
+            "<hover:show_item:${item.type.name.lowercase()}:${item.amount}:'${item.itemMeta.asString}'>${
+                mm.serialize(
+                    message
+                )
+            }"
+        )
+    }
+
+
+    fun getNearestPlaceDistance(shopChest: Shop) = hypot(
+        getNearPlace(shopChest)!!.x.toDouble() - shopChest.location.blockX,
+        getNearPlace(shopChest)!!.z.toDouble() - shopChest.location.blockZ
+    )
+
+    fun getTags(
+        shopChest: Shop, count: String, distance: Int, nearPlace: PlaceData, nearTownDistance: Double
+    ): Array<TagResolver.Single> {
+        val mm = MiniMessage.miniMessage()
+
+        return arrayOf(
             Placeholder.component(
                 "player-name", if (shopChest.isUnlimited) {
                     Component.text("アドミンショップ")
@@ -161,42 +207,27 @@ class ShopFindCommand {
             Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
             Placeholder.component(
                 "shop-type", mm.deserialize(if (shopChest.isBuying) "<color:red>買取" else "<color:green>販売")
-            ),
-            Placeholder.component("enchantment", mm.deserialize(enchantment))
-        )
-        val item = shopChest.item
-
-        val message = mm.deserialize(Config.config.format, *tags)
-
-        return mm.deserialize(
-            "<hover:show_item:${item.type.name.lowercase()}:${item.amount}:'${item.itemMeta.asString}'>${
-                mm.serialize(
-                    message
-                )
-            }"
+            )
         )
     }
 
-
-    companion object {
-        suspend fun getSellingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
-            if (shopChest.isUnlimited) {
-                "無制限"
-            } else {
-                "${shopChest.remainingStock} * ${shopChest.shopStackingAmount}個"
-            }
+    suspend fun getSellingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
+        if (shopChest.isUnlimited) {
+            "無制限"
+        } else {
+            "${shopChest.remainingStock} * ${shopChest.shopStackingAmount}個"
         }
+    }
 
 
-        fun getPlayerDistance(playerLocation: Location, shopChest: Shop) =
-            hypot(playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z).toInt()
+    fun getPlayerDistance(playerLocation: Location, shopChest: Shop) =
+        hypot(playerLocation.x - shopChest.location.x, playerLocation.z - shopChest.location.z).toInt()
 
-        suspend fun getBuyingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
-            if (shopChest.isUnlimited) {
-                "無制限"
-            } else {
-                "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
-            }
+    suspend fun getBuyingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
+        if (shopChest.isUnlimited) {
+            "無制限"
+        } else {
+            "${shopChest.remainingSpace} * ${shopChest.shopStackingAmount}個"
         }
     }
 
@@ -209,8 +240,9 @@ class ShopFindCommand {
         }
         return null
     }
-}
 
-fun getNearPlace(shopChest: Shop) = Config.config.placeData.minByOrNull {
-    hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
+
+    fun getNearPlace(shopChest: Shop) = Config.config.placeData.minByOrNull {
+        hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
+    }
 }

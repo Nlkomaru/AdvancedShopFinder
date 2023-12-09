@@ -47,7 +47,7 @@ class AdvancedShopFinder : SuspendingJavaPlugin() {
         setCommand()
         val br = this.javaClass.classLoader.getResourceAsStream("ja_JP.json")!!
         translateData = Config.json.decodeFromStream<TranslateMap>(br).map
-        protocolManager = ProtocolLibrary.getProtocolManager();
+        protocolManager = ProtocolLibrary.getProtocolManager()
     }
 
     override fun onDisable() {
@@ -58,8 +58,9 @@ class AdvancedShopFinder : SuspendingJavaPlugin() {
 
         val handler = BukkitCommandHandler.create(this)
 
-        handler.setSwitchPrefix("--")
         handler.setFlagPrefix("--")
+        handler.setSwitchPrefix("--")
+
         handler.supportSuspendFunctions()
 
         //Enchantment
@@ -70,9 +71,9 @@ class AdvancedShopFinder : SuspendingJavaPlugin() {
         handler.autoCompleter.registerSuggestionFactory { parameter: CommandParameter ->
             if (parameter.hasAnnotation(ItemNameSuggestion::class.java)) {
                 return@registerSuggestionFactory SuggestionProvider { _: List<String>, _: CommandActor, _: ExecutableCommand ->
-                    Material.values().map {
+                    Material.entries.map {
                         translateData[it.translationKey()] ?: it.translationKey()
-                    } + Material.values().map { it.name.lowercase() }
+                    } + Material.entries.map { it.name.lowercase() }
                 }
             }
             null
@@ -94,11 +95,10 @@ class AdvancedShopFinder : SuspendingJavaPlugin() {
 
 
         with(handler) {
-            register(ShopFindCommand())
+            register(ShopFindCommand)
             register(ReloadCommand())
             register(EnchantFindCommand())
             register(HelpCommand())
         }
-        handler.registerBrigadier()
     }
 }

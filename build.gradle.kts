@@ -21,33 +21,39 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://repo.dmulloy2.net/repository/public/" )
 }
-val paperVersion = "1.20.1-R0.1-SNAPSHOT"
-val cloudVersion = "1.8.3"
-val vaultVersion = "1.7"
-val mccoroutineVersion = "2.13.0"
-val quickShopVersion = "5.2.0.5"
-val lampVersion = "3.1.7"
+
 
 dependencies {
-    compileOnly("io.papermc.paper", "paper-api", paperVersion)
+    val paperVersion = "1.20.2-R0.1-SNAPSHOT"
+    val mccoroutineVersion = "2.13.0"
+    val lampVersion = "3.1.8"
+    val coroutineVersion = "1.7.3"
+    val serializationVersion = "1.6.2"
+    val vaultVersion = "1.7"
+    val quickShopVersion = "5.2.0.5"
+
+    compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
     library(kotlin("stdlib"))
 
-    compileOnly("com.github.MilkBowl", "VaultAPI", vaultVersion)
+    implementation("com.github.Revxrsal.Lamp:common:$lampVersion")
+    implementation("com.github.Revxrsal.Lamp:bukkit:$lampVersion")
 
-    compileOnly("com.comphenix.protocol", "ProtocolLib", "5.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
 
-    compileOnly("com.ghostchu", "quickshop-bukkit", quickShopVersion)
-    compileOnly("com.ghostchu", "quickshop-api", quickShopVersion)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
-    implementation("com.github.Revxrsal.Lamp","common",lampVersion)
-    implementation("com.github.Revxrsal.Lamp","bukkit",lampVersion)
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:$mccoroutineVersion")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
 
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.7.3")
-    implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json", "1.5.1")
+    compileOnly("com.github.MilkBowl:VaultAPI:$vaultVersion")
 
-    implementation("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-api", mccoroutineVersion)
-    implementation("com.github.shynixn.mccoroutine", "mccoroutine-bukkit-core", mccoroutineVersion)
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
+
+    compileOnly("com.ghostchu:quickshop-bukkit:$quickShopVersion")
+    compileOnly("com.ghostchu:quickshop-api:$quickShopVersion")
+    
+    
 
 }
 
@@ -90,10 +96,6 @@ bukkit {
     depend = listOf("QuickShop-Hikari","ProtocolLib") // need to change
 
     apiVersion = "1.20"
-    libraries = listOf(
-        "com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.11.0",
-        "com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.11.0"
-    )
 }
 
 tasks.register("depsize") {
