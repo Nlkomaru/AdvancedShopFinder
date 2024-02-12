@@ -31,6 +31,11 @@ dependencies {
     val serializationVersion = "1.6.2"
     val vaultVersion = "1.7"
     val quickShopVersion = "5.2.0.5"
+    val koinVersion = "3.5.3"
+    val junitVersion = "5.10.2"
+    val mockkVersion = "1.13.9"
+    val mockBukkitVersion = "3.70.0"
+
 
     compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
@@ -52,8 +57,14 @@ dependencies {
 
     compileOnly("com.ghostchu:quickshop-bukkit:$quickShopVersion")
     compileOnly("com.ghostchu:quickshop-api:$quickShopVersion")
-    
-    
+
+    implementation("io.insert-koin:koin-core:$koinVersion")
+
+    testImplementation("com.github.seeseemelk:MockBukkit-v1.20:$mockBukkitVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
+    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
 
 }
 
@@ -80,7 +91,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks {
     runServer {
-        minecraftVersion("1.20.2")
+        minecraftVersion("1.20.4")
     }
 }
 

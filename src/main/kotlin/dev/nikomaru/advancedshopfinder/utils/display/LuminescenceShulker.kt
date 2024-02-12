@@ -1,21 +1,24 @@
 package dev.nikomaru.advancedshopfinder.utils.display
 
 import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.ProtocolManager
 import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.WrappedDataValue
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.WrappedDataWatcherObject
-import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.*
 import kotlin.random.Random
 
-class LuminescenceShulker {
+class LuminescenceShulker: KoinComponent {
+    val protocolManager: ProtocolManager by inject()
 
     private val ids = arrayListOf<Int>()
 
@@ -63,8 +66,8 @@ class LuminescenceShulker {
                     }
                     shulkerEffectPacket.dataValueCollectionModifier.write(0, wrappedDataValueList)
 
-                    AdvancedShopFinder.protocolManager.sendServerPacket(it, shulkerPacket)
-                    AdvancedShopFinder.protocolManager.sendServerPacket(it, shulkerEffectPacket)
+                    protocolManager.sendServerPacket(it, shulkerPacket)
+                    protocolManager.sendServerPacket(it, shulkerEffectPacket)
                 }
             }
         }
@@ -75,7 +78,7 @@ class LuminescenceShulker {
             target.forEach {
                 val shulkerDeadPacket = PacketContainer(PacketType.Play.Server.ENTITY_DESTROY)
                 shulkerDeadPacket.intLists.write(0, ids)
-                AdvancedShopFinder.protocolManager.sendServerPacket(it, shulkerDeadPacket)
+                protocolManager.sendServerPacket(it, shulkerDeadPacket)
             }
             ids.clear()
         }
