@@ -4,7 +4,7 @@ import dev.nikomaru.advancedshopfinder.data.FindOption
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PlayerConfig(
+data class PlayerFindOption(
     val setting: String = "default",
     val findOptions: HashMap<String, FindOption> = hashMapOf("default" to FindOption()),
 )

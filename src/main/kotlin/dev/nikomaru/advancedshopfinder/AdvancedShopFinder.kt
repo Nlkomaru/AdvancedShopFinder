@@ -27,8 +27,6 @@ import revxrsal.commands.ktx.supportSuspendFunctions
 
 open class AdvancedShopFinder: SuspendingJavaPlugin() {
     private lateinit var translateData: TranslateMap
-
-
     @OptIn(ExperimentalSerializationApi::class)
     override fun onEnable() {
         // Plugin startup logic
@@ -79,7 +77,7 @@ open class AdvancedShopFinder: SuspendingJavaPlugin() {
             null
         }
 
-        handler.setHelpWriter { command, actor ->
+        handler.setHelpWriter { command, _ ->
             java.lang.String.format(
                 """
                 <color:yellow>コマンド: <color:gray>%s

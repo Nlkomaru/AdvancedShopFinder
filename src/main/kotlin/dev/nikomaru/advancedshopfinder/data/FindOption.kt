@@ -28,6 +28,6 @@ data class LightingOption(
     val lightning: Boolean = true,
     val lightningTimeMills: Long = 1000,
     val lightningIntervalMills: Long = 400,
-    val lightningCount: Int = 5,
+    val lightningCount: Int = 10,
     val lightningDistance: Int = 200,
 )

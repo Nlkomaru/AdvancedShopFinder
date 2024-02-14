@@ -13,13 +13,14 @@ import dev.nikomaru.advancedshopfinder.files.TranslateMap
 import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
-import dev.nikomaru.advancedshopfinder.utils.data.PlayerConfigUtils.getPlayerFindOption
+import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
 import dev.nikomaru.advancedshopfinder.utils.display.LuminescenceShulker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
@@ -33,6 +34,7 @@ import org.koin.core.component.inject
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Description
 import revxrsal.commands.annotation.Subcommand
+import java.util.function.UnaryOperator
 import kotlin.math.hypot
 
 
@@ -49,11 +51,7 @@ object ShopFindCommand: KoinComponent {
         sender: CommandSender, @ItemNameSuggestion itemName: String
     ) {
         val item = getKey(translateData.map, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
-        val options = if (sender is Player) {
-            sender.getPlayerFindOption()
-        } else {
-            FindOption()
-        } ?: FindOption()
+        val options = (sender as? Player)?.getPlayerFindOption() ?: FindOption()
         val shop = quickShop.shopManager.allShops.filter {
             it.item.type.translationKey().equals(item, true)
         }
@@ -62,7 +60,6 @@ object ShopFindCommand: KoinComponent {
             sender.sendRichMessage("検索結果: 0件")
             return
         }
-
         var message: Component = Component.text("")
         var sum = 0
 
@@ -151,12 +148,12 @@ object ShopFindCommand: KoinComponent {
             if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
         val distance = getPlayerDistance(playerLocation, shopChest)
         val count = if (shopChest.isBuying) getBuyingShopCount(shopChest) else getSellingShopCount(shopChest)
-
         val tags = getTags(shopChest, count, distance, nearPlace, nearTownDistance)
         val item = shopChest.item
-
         val mm = MiniMessage.miniMessage()
         val message = mm.deserialize(config.format, *tags)
+        val hoverMessage = Bukkit.getItemFactory().asHoverEvent(item, UnaryOperator.identity()).value()
+        message.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_ITEM, hoverMessage))
 
         return mm.deserialize(
             "<hover:show_item:${item.type.name.lowercase()}:${item.amount}:'${item.itemMeta.asString}'>${

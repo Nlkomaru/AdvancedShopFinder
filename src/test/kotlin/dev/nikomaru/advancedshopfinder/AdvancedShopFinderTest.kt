@@ -10,12 +10,13 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
 class AdvancedShopFinderTest: BeforeEachCallback, AfterEachCallback {
-    lateinit var server: ServerMock
-    lateinit var plugin: AdvancedShopFinder
+    private lateinit var server: ServerMock
+    private lateinit var plugin: AdvancedShopFinder
 
     override fun beforeEach(context: ExtensionContext) {
         println("beforeEach() executed before " + context.displayName + ".")
         server = MockBukkit.mock()
+        plugin = MockBukkit.load(AdvancedShopFinder::class.java)
         setupKoin()
     }
 
@@ -26,7 +27,6 @@ class AdvancedShopFinderTest: BeforeEachCallback, AfterEachCallback {
 
 
     private fun setupKoin() {
-        plugin = MockBukkit.load(AdvancedShopFinder::class.java)
         val appModule = module {
             single<AdvancedShopFinder> { plugin }
             single<ServerMock> { server }

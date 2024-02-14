@@ -3,7 +3,7 @@ package dev.nikomaru.advancedshopfinder.commands
 import com.ghostchu.quickshop.api.QuickShopAPI
 import com.ghostchu.quickshop.api.shop.ShopType
 import dev.nikomaru.advancedshopfinder.data.FindOption
-import dev.nikomaru.advancedshopfinder.utils.data.PlayerConfigUtils.getPlayerFindOption
+import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
@@ -29,11 +29,7 @@ class EnchantFindCommand: KoinComponent {
                 enchantment
             )
         }
-        val options = if (sender is Player) {
-            sender.getPlayerFindOption()
-        } else {
-            FindOption()
-        } ?: FindOption()
+        val options = (sender as? Player)?.getPlayerFindOption() ?: FindOption()
 
         if (shop.isEmpty()) {
             sender.sendRichMessage("検索結果: 0件")
