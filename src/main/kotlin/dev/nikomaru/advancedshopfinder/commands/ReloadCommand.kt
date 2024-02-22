@@ -1,7 +1,7 @@
 package dev.nikomaru.advancedshopfinder.commands
 
 
-import dev.nikomaru.advancedshopfinder.files.Config
+import dev.nikomaru.advancedshopfinder.files.server.Config
 import org.bukkit.command.CommandSender
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Subcommand

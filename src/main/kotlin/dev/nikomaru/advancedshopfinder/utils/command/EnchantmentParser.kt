@@ -8,7 +8,7 @@ import revxrsal.commands.command.CommandActor
 import revxrsal.commands.command.ExecutableCommand
 import revxrsal.commands.process.ValueResolver
 
-object EnchantmentParser : ValueResolver<Enchantment> {
+object EnchantmentParser: ValueResolver<Enchantment> {
     private fun suggestions(): Set<String> {
         return Enchantment.values().map { it.key.key }.toSet()
     }

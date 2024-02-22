@@ -6,7 +6,7 @@ import revxrsal.commands.command.CommandActor
 import revxrsal.commands.command.ExecutableCommand
 import revxrsal.commands.process.ValueResolver
 
-object MaterialParser : ValueParser<Material>() {
+object MaterialParser: ValueParser<Material>() {
     override fun suggestions(args: List<String>, sender: CommandActor, command: ExecutableCommand): Set<String> {
         return Material.values().map { it.name }.toSet()
     }
