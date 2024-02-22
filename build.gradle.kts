@@ -31,6 +31,7 @@ dependencies {
     val serializationVersion = "1.6.2"
     val vaultVersion = "1.7"
     val quickShopVersion = "5.2.0.5"
+    val koinVersion = "3.5.3"
 
     compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
@@ -52,6 +53,8 @@ dependencies {
 
     compileOnly("com.ghostchu:quickshop-bukkit:$quickShopVersion")
     compileOnly("com.ghostchu:quickshop-api:$quickShopVersion")
+
+    implementation("io.insert-koin:koin-core:$koinVersion")
 }
 
 java {
