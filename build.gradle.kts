@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-
 plugins {
     id("java")
     kotlin("jvm") version "1.9.0"
@@ -22,7 +20,6 @@ repositories {
     maven("https://repo.incendo.org/content/repositories/snapshots")
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://repo.dmulloy2.net/repository/public/" )
-    maven("https://repo.viaversion.com")
 }
 
 
@@ -32,12 +29,9 @@ dependencies {
     val lampVersion = "3.1.8"
     val coroutineVersion = "1.7.3"
     val serializationVersion = "1.6.2"
-    val quickShopVersion = "6.0.0.6"
+    val vaultVersion = "1.7"
+    val quickShopVersion = "5.2.0.5"
     val koinVersion = "3.5.3"
-    val junitVersion = "5.10.2"
-    val mockkVersion = "1.13.9"
-    val mockBukkitVersion = "3.71.0"
-
 
     compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
@@ -53,19 +47,14 @@ dependencies {
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:$mccoroutineVersion")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
 
+    compileOnly("com.github.MilkBowl:VaultAPI:$vaultVersion")
+
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
+
     compileOnly("com.ghostchu:quickshop-bukkit:$quickShopVersion")
     compileOnly("com.ghostchu:quickshop-api:$quickShopVersion")
 
     implementation("io.insert-koin:koin-core:$koinVersion")
-
-    testImplementation("com.comphenix.protocol:ProtocolLib:5.2.0-SNAPSHOT")
-
-    testImplementation("com.github.seeseemelk:MockBukkit-v1.20:$mockBukkitVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    testImplementation("io.insert-koin:koin-test:$koinVersion")
-    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
 }
 
 java {
@@ -83,14 +72,6 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
-    test {
-        useJUnitPlatform()
-        testLogging {
-            showStandardStreams = true
-            events("passed", "skipped", "failed")
-            exceptionFormat = TestExceptionFormat.FULL
-        }
-    }
 }
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
@@ -98,7 +79,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks {
     runServer {
-        minecraftVersion("1.20.4")
+        minecraftVersion("1.20.2")
     }
 }
 

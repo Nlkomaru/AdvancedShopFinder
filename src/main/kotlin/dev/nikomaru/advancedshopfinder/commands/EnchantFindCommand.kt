@@ -2,8 +2,13 @@ package dev.nikomaru.advancedshopfinder.commands
 
 import com.ghostchu.quickshop.api.QuickShopAPI
 import com.ghostchu.quickshop.api.shop.ShopType
-import dev.nikomaru.advancedshopfinder.data.FindOption
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toGsonText
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toLegacyText
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toMiniMessage
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toPlainText
+import dev.nikomaru.advancedshopfinder.utils.data.FindOption
 import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
+import dev.nikomaru.advancedshopfinder.utils.data.TextType
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
@@ -52,6 +57,16 @@ class EnchantFindCommand: KoinComponent {
         sum = newBuySum
 
         sender.sendRichMessage("<color:green><lang:${enchantment.translationKey()}> の検索結果: ${sum}件")
-        sender.sendMessage(message)
+        val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
+        when (textType) {
+            TextType.COMPONENT -> sender.sendMessage(message)
+            TextType.LEGACY -> sender.sendMessage(message.toLegacyText())
+            TextType.GSON -> sender.sendMessage(message.toGsonText())
+            TextType.PLAIN -> sender.sendMessage(message.toPlainText())
+            TextType.MINI_MESSAGE -> sender.sendRichMessage(message.toMiniMessage())
+            TextType.MINI_MESSAGE_RAW -> sender.sendMessage(message.toMiniMessage())
+        }
+
     }
+
 }

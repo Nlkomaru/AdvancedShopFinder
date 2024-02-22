@@ -5,6 +5,5 @@ import kotlin.coroutines.CoroutineContext
 
 val Dispatchers.async: CoroutineContext
     get() = DispatcherContainer.async
-
 val Dispatchers.minecraft: CoroutineContext
     get() = DispatcherContainer.sync

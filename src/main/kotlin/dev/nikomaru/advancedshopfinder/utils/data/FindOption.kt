@@ -1,4 +1,4 @@
-package dev.nikomaru.advancedshopfinder.data
+package dev.nikomaru.advancedshopfinder.utils.data
 
 import kotlinx.serialization.Serializable
 
@@ -9,6 +9,7 @@ data class FindOption(
     val sortOption: SortOption = SortOption(),
     val lightningOption: LightingOption = LightingOption(),
     val showNoStockShop: Boolean = false,
+    val textType: TextType = TextType.COMPONENT,
 )
 
 @Serializable

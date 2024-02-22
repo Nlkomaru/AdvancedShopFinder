@@ -1,4 +1,4 @@
-package dev.nikomaru.advancedshopfinder.files
+package dev.nikomaru.advancedshopfinder.files.server
 
 import kotlinx.serialization.Serializable
 

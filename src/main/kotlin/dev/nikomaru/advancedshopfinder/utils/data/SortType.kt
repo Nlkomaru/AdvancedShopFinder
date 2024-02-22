@@ -1,4 +1,4 @@
-package dev.nikomaru.advancedshopfinder.data
+package dev.nikomaru.advancedshopfinder.utils.data
 
 
 enum class SortType {

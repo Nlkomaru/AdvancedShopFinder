@@ -1,8 +1,8 @@
 package dev.nikomaru.advancedshopfinder.utils.data
 
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
-import dev.nikomaru.advancedshopfinder.files.Config.json
 import dev.nikomaru.advancedshopfinder.files.PlayerFindOption
+import dev.nikomaru.advancedshopfinder.files.server.Config.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString

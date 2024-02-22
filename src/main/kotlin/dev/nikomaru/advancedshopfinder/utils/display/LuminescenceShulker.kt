@@ -19,11 +19,8 @@ import kotlin.random.Random
 
 class LuminescenceShulker: KoinComponent {
     val protocolManager: ProtocolManager by inject()
-
     private val ids = arrayListOf<Int>()
-
     private val blocks = arrayListOf<Location>()
-
     private val target = arrayListOf<Player>()
 
     fun addBlock(location: Location) {
@@ -40,15 +37,12 @@ class LuminescenceShulker: KoinComponent {
                 target.forEach {
                     val entityId = Random.nextInt(Int.MAX_VALUE)
                     ids.add(entityId)
-
                     val shulkerPacket = PacketContainer(PacketType.Play.Server.SPAWN_ENTITY)
                     shulkerPacket.integers.write(0, entityId)
                     shulkerPacket.entityTypeModifier.write(0, EntityType.SHULKER)
                     shulkerPacket.uuiDs.write(0, UUID.randomUUID())
                     shulkerPacket.doubles.write(0, location.x).write(1, location.y).write(2, location.z)
-
                     val byteSerializer = WrappedDataWatcher.Registry.get(java.lang.Byte::class.java)
-
                     val shulkerEffectPacket = PacketContainer(PacketType.Play.Server.ENTITY_METADATA)
                     shulkerEffectPacket.integers.write(0, entityId)
                     val watcher = WrappedDataWatcher()

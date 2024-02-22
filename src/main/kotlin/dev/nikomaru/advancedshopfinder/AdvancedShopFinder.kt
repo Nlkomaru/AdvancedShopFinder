@@ -2,19 +2,19 @@ package dev.nikomaru.advancedshopfinder
 
 import com.comphenix.protocol.ProtocolLibrary
 import com.ghostchu.quickshop.api.QuickShopAPI
-import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import dev.nikomaru.advancedshopfinder.commands.EnchantFindCommand
 import dev.nikomaru.advancedshopfinder.commands.HelpCommand
 import dev.nikomaru.advancedshopfinder.commands.ReloadCommand
 import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand
-import dev.nikomaru.advancedshopfinder.files.Config
-import dev.nikomaru.advancedshopfinder.files.TranslateMap
+import dev.nikomaru.advancedshopfinder.files.server.Config
+import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
 import dev.nikomaru.advancedshopfinder.utils.command.EnchantmentParser.enchantmentSupport
 import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import dev.nikomaru.advancedshopfinder.utils.command.MaterialParser.materialSupport
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import org.bukkit.Material
+import org.bukkit.plugin.java.JavaPlugin
 import org.koin.core.context.GlobalContext
 import org.koin.dsl.module
 import revxrsal.commands.autocomplete.SuggestionProvider
@@ -25,11 +25,11 @@ import revxrsal.commands.command.ExecutableCommand
 import revxrsal.commands.ktx.supportSuspendFunctions
 
 
-open class AdvancedShopFinder: SuspendingJavaPlugin() {
+open class AdvancedShopFinder: JavaPlugin() {
     private lateinit var translateData: TranslateMap
+
     @OptIn(ExperimentalSerializationApi::class)
-    override fun onEnable() {
-        // Plugin startup logic
+    override fun onEnable() { // Plugin startup logic
         setupKoin()
         Config.loadConfig()
         setCommand()
@@ -48,22 +48,17 @@ open class AdvancedShopFinder: SuspendingJavaPlugin() {
         }
     }
 
-    override fun onDisable() {
-        // Plugin shutdown logic
+    override fun onDisable() { // Plugin shutdown logic
     }
 
     private fun setCommand() {
-
         val handler = BukkitCommandHandler.create(this)
 
         handler.setFlagPrefix("--")
         handler.setSwitchPrefix("--")
 
-        handler.supportSuspendFunctions()
-
-        //Enchantment
-        handler.enchantmentSupport()
-        //Material
+        handler.supportSuspendFunctions() //Enchantment
+        handler.enchantmentSupport() //Material
         handler.materialSupport()
 
         handler.autoCompleter.registerSuggestionFactory { parameter: CommandParameter ->

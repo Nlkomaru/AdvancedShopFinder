@@ -5,15 +5,20 @@ import com.ghostchu.quickshop.api.shop.Shop
 import com.ghostchu.quickshop.api.shop.ShopType
 import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
-import dev.nikomaru.advancedshopfinder.data.FindOption
-import dev.nikomaru.advancedshopfinder.data.SortType
-import dev.nikomaru.advancedshopfinder.files.ConfigData
-import dev.nikomaru.advancedshopfinder.files.PlaceData
-import dev.nikomaru.advancedshopfinder.files.TranslateMap
+import dev.nikomaru.advancedshopfinder.files.server.ConfigData
+import dev.nikomaru.advancedshopfinder.files.server.PlaceData
+import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toGsonText
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toLegacyText
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toMiniMessage
+import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toPlainText
 import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
+import dev.nikomaru.advancedshopfinder.utils.data.FindOption
 import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
+import dev.nikomaru.advancedshopfinder.utils.data.SortType
+import dev.nikomaru.advancedshopfinder.utils.data.TextType
 import dev.nikomaru.advancedshopfinder.utils.display.LuminescenceShulker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -30,6 +35,7 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Description
@@ -43,7 +49,6 @@ object ShopFindCommand: KoinComponent {
     private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
     private val plugin: AdvancedShopFinder by inject()
-    private val config: ConfigData by inject()
 
     @Subcommand("search")
     @Description("アイテムを検索します")
@@ -77,7 +82,15 @@ object ShopFindCommand: KoinComponent {
         sum = newBuySum
 
         sender.sendRichMessage("<color:green><lang:${item}> の検索結果: ${sum}件")
-        sender.sendMessage(message)
+        val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
+        when (textType) {
+            TextType.COMPONENT -> sender.sendMessage(message)
+            TextType.LEGACY -> sender.sendMessage(message.toLegacyText())
+            TextType.GSON -> sender.sendMessage(message.toGsonText())
+            TextType.PLAIN -> sender.sendMessage(message.toPlainText())
+            TextType.MINI_MESSAGE -> sender.sendRichMessage(message.toMiniMessage())
+            TextType.MINI_MESSAGE_RAW -> sender.sendMessage(message.toMiniMessage())
+        }
     }
 
     suspend fun processShops(
@@ -151,6 +164,7 @@ object ShopFindCommand: KoinComponent {
         val tags = getTags(shopChest, count, distance, nearPlace, nearTownDistance)
         val item = shopChest.item
         val mm = MiniMessage.miniMessage()
+        val config: ConfigData = get()
         val message = mm.deserialize(config.format, *tags)
         val hoverMessage = Bukkit.getItemFactory().asHoverEvent(item, UnaryOperator.identity()).value()
         message.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_ITEM, hoverMessage))
@@ -228,7 +242,7 @@ object ShopFindCommand: KoinComponent {
     }
 
 
-    private fun getNearPlace(shopChest: Shop) = config.placeData.minByOrNull {
+    private fun getNearPlace(shopChest: Shop) = get<ConfigData>().placeData.minByOrNull {
         hypot(it.x.toDouble() - shopChest.location.blockX, it.z.toDouble() - shopChest.location.blockZ)
     }
 }
