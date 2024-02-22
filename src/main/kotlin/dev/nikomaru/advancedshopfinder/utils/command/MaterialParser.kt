@@ -8,7 +8,7 @@ import revxrsal.commands.process.ValueResolver
 
 object MaterialParser: ValueParser<Material>() {
     override fun suggestions(args: List<String>, sender: CommandActor, command: ExecutableCommand): Set<String> {
-        return Material.values().map { it.name }.toSet()
+        return Material.entries.map { it.name }.toSet()
     }
 
     override fun resolve(context: ValueResolver.ValueResolverContext): Material {

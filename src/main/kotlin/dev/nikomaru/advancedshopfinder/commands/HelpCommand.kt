@@ -11,7 +11,7 @@ import revxrsal.commands.help.CommandHelp
 class HelpCommand {
     @Subcommand("help")
     fun help(sender: CommandSender, helpEntries: CommandHelp<String>, @Default("1") page: Int) {
-        for (entry in helpEntries.paginate(page, 7))  // 7 entries per page
+        for (entry in helpEntries.paginate(page, 5))  // 5 entries per page
             sender.sendRichMessage(entry)
     }
 }
