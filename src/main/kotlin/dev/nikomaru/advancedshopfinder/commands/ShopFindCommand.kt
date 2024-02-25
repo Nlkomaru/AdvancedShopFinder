@@ -25,7 +25,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
@@ -40,7 +39,6 @@ import org.koin.core.component.inject
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Description
 import revxrsal.commands.annotation.Subcommand
-import java.util.function.UnaryOperator
 import kotlin.math.hypot
 
 
@@ -165,15 +163,8 @@ object ShopFindCommand: KoinComponent {
         val item = shopChest.item
         val mm = MiniMessage.miniMessage()
         val config: ConfigData = get()
-        val message = mm.deserialize(config.format, *tags)
-        val hoverMessage = Bukkit.getItemFactory().asHoverEvent(item, UnaryOperator.identity()).value()
-        message.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_ITEM, hoverMessage))
-
-        return mm.deserialize(
-            "<hover:show_item:${item.type.name.lowercase()}:${item.amount}:'${item.itemMeta.asString}'>${
-                mm.serialize(message)
-            }"
-        )
+        val message = mm.deserialize(config.format, *tags).hoverEvent(item.asHoverEvent())
+        return message
     }
 
 
