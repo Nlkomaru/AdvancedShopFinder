@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     val paperVersion = "1.20.4-R0.1-SNAPSHOT"
-    val mccoroutineVersion = "2.13.0"
+    val mccoroutineVersion = "2.14.0"
     val lampVersion = "3.1.8"
     val coroutineVersion = "1.7.3"
     val serializationVersion = "1.6.2"
