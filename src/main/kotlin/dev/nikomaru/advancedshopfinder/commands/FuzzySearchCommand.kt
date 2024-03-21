@@ -2,6 +2,8 @@ package dev.nikomaru.advancedshopfinder.commands
 
 import com.ghostchu.quickshop.api.QuickShopAPI
 import com.ghostchu.quickshop.api.shop.ShopType
+import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
+import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toGsonText
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toLegacyText
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toMiniMessage
@@ -10,32 +12,29 @@ import dev.nikomaru.advancedshopfinder.utils.data.FindOption
 import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
 import dev.nikomaru.advancedshopfinder.utils.data.TextType
 import net.kyori.adventure.text.Component
-import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.inventory.meta.EnchantmentStorageMeta
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Subcommand
 
-
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
-object EnchantFindCommand: KoinComponent {
+object FuzzySearchCommand: KoinComponent {
+    private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
+    private val plugin: AdvancedShopFinder by inject()
 
-    @Subcommand("bookfind")
-    suspend fun enchantFind(
-        sender: CommandSender, enchantment: Enchantment
-    ) {
-        val shop = quickShop.shopManager.allShops.filter {
-            it.item.type == Material.ENCHANTED_BOOK && (it.item.itemMeta as EnchantmentStorageMeta).hasStoredEnchant(
-                enchantment
-            )
+    @Subcommand("fuzzysearch")
+    suspend fun fuzzySearch(sender: CommandSender, name: String) {
+        val keyList = translateData.map.filter { (k, v) -> v.contains(name) || k.contains(name) }.map { (k, _) ->
+            k.lowercase()
         }
         val options = (sender as? Player)?.getPlayerFindOption() ?: FindOption()
-
+        val shop = quickShop.shopManager.allShops.filter {
+            keyList.contains(it.item.type.translationKey().lowercase()) || it.item.displayName().toLegacyText()
+                .contains(name)
+        }
         if (shop.isEmpty()) {
             sender.sendRichMessage("検索結果: 0件")
             return
@@ -56,7 +55,7 @@ object EnchantFindCommand: KoinComponent {
         message = newBuyMessage
         sum = newBuySum
 
-        sender.sendRichMessage("<color:green><lang:${enchantment.translationKey()}> の検索結果: ${sum}件")
+        sender.sendRichMessage("<color:green>${name} の検索結果: ${sum}件")
         val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
         when (textType) {
             TextType.COMPONENT -> sender.sendMessage(message)
@@ -66,7 +65,5 @@ object EnchantFindCommand: KoinComponent {
             TextType.MINI_MESSAGE -> sender.sendRichMessage(message.toMiniMessage())
             TextType.MINI_MESSAGE_RAW -> sender.sendMessage(message.toMiniMessage())
         }
-
     }
-
 }

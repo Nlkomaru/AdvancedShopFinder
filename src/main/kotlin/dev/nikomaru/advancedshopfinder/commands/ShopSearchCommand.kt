@@ -43,7 +43,7 @@ import kotlin.math.hypot
 
 
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
-object ShopFindCommand: KoinComponent {
+object ShopSearchCommand: KoinComponent {
     private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
     private val plugin: AdvancedShopFinder by inject()

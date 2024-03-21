@@ -2,10 +2,7 @@ package dev.nikomaru.advancedshopfinder
 
 import com.comphenix.protocol.ProtocolLibrary
 import com.ghostchu.quickshop.api.QuickShopAPI
-import dev.nikomaru.advancedshopfinder.commands.EnchantFindCommand
-import dev.nikomaru.advancedshopfinder.commands.HelpCommand
-import dev.nikomaru.advancedshopfinder.commands.ReloadCommand
-import dev.nikomaru.advancedshopfinder.commands.ShopFindCommand
+import dev.nikomaru.advancedshopfinder.commands.*
 import dev.nikomaru.advancedshopfinder.files.server.Config
 import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
 import dev.nikomaru.advancedshopfinder.utils.command.EnchantmentParser.enchantmentSupport
@@ -88,10 +85,11 @@ open class AdvancedShopFinder: JavaPlugin() {
 
 
         with(handler) {
-            register(ShopFindCommand)
-            register(ReloadCommand())
-            register(EnchantFindCommand())
-            register(HelpCommand())
+            register(ShopSearchCommand)
+            register(ReloadCommand)
+            register(EnchantFindCommand)
+            register(HelpCommand)
+            register(FuzzySearchCommand)
         }
     }
 }

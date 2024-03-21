@@ -9,7 +9,7 @@ import revxrsal.commands.bukkit.annotation.CommandPermission
 
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
 @CommandPermission("advancedshopfinder.admin")
-class ReloadCommand {
+object ReloadCommand {
     @Subcommand("reload")
     fun reload(sender: CommandSender) {
         Config.loadConfig()
