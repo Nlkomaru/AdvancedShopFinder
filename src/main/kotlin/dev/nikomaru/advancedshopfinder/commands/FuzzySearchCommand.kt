@@ -32,7 +32,7 @@ object FuzzySearchCommand: KoinComponent {
         }
         val options = (sender as? Player)?.getPlayerFindOption() ?: FindOption()
         val shop = quickShop.shopManager.allShops.filter {
-            keyList.contains(it.item.type.translationKey().lowercase()) || it.item.displayName().toLegacyText()
+            keyList.contains(it.item.type.translationKey().lowercase()) || it.item.displayName().toPlainText()
                 .contains(name)
         }
         if (shop.isEmpty()) {
