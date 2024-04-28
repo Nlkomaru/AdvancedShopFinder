@@ -37,6 +37,9 @@ plugins:
           default: true
           name: English
           build: true
+        - locale: ja
+          name: 日本語
+          build: true
 repo_url: https://github.com/Nlkomaru/AdvancedShopFinder
 repo_name: AdvancedShopFinder
 copyright: No Rights Reserved(CC0).  Written by Nikomaru in 2024
