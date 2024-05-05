@@ -2,7 +2,6 @@ package dev.nikomaru.advancedshopfinder.commands
 
 import com.ghostchu.quickshop.api.QuickShopAPI
 import com.ghostchu.quickshop.api.shop.ShopType
-import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.files.server.ConfigData
 import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toGsonText
@@ -16,6 +15,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Subcommand
@@ -24,8 +24,6 @@ import revxrsal.commands.annotation.Subcommand
 object FuzzySearchCommand: KoinComponent {
     private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
-    private val plugin: AdvancedShopFinder by inject()
-    private val configData: ConfigData by inject()
 
     @Subcommand("fuzzysearch")
     suspend fun fuzzySearch(sender: CommandSender, name: String) {
@@ -41,7 +39,7 @@ object FuzzySearchCommand: KoinComponent {
             sender.sendRichMessage("検索結果: 0件")
             return
         }
-        if (shop.size > configData.fuzzySearchLimit) {
+        if (shop.size > get<ConfigData>().fuzzySearchLimit) {
             sender.sendRichMessage("検索結果が多すぎます。絞り込んでください。")
             return
         }

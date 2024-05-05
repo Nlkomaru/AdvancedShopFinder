@@ -17,6 +17,7 @@ object Config: KoinComponent {
             prettyPrint = true
             isLenient = true
             encodeDefaults = true
+            ignoreUnknownKeys = true
         }
         val configFile = plugin.dataFolder.resolve("config.json")
 
