@@ -1,10 +1,10 @@
 plugins {
-    id("java")
-    kotlin("jvm") version "1.9.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("xyz.jpenilla.run-paper") version "2.1.0"
-    id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
-    kotlin("plugin.serialization") version "1.9.0"
+    java
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.run.paper)
+    alias(libs.plugins.resource.factory)
 }
 
 group = "dev.nikomaru"
@@ -12,126 +12,74 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    maven("https://papermc.io/repo/repository/maven-public/")
+    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://oss.sonatype.org/content/groups/public/")
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     maven("https://jitpack.io")
     maven("https://plugins.gradle.org/m2/")
-    maven("https://repo.incendo.org/content/repositories/snapshots")
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://repo.dmulloy2.net/repository/public/" )
 }
 
 
 dependencies {
-    val paperVersion = "1.20.4-R0.1-SNAPSHOT"
-    val mccoroutineVersion = "2.13.0"
-    val lampVersion = "3.1.8"
-    val coroutineVersion = "1.7.3"
-    val serializationVersion = "1.6.2"
-    val vaultVersion = "1.7"
-    val quickShopVersion = "5.2.0.5"
-    val koinVersion = "3.5.3"
+    compileOnly(libs.paper.api)
 
-    compileOnly("io.papermc.paper:paper-api:$paperVersion")
+    implementation(libs.bundles.commands)
 
-    library(kotlin("stdlib"))
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation("com.github.Revxrsal.Lamp:common:$lampVersion")
-    implementation("com.github.Revxrsal.Lamp:bukkit:$lampVersion")
+    implementation(libs.bundles.coroutines)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
+    compileOnly(libs.vault.api)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+    compileOnly(libs.protocol.lib)
 
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:$mccoroutineVersion")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
+    compileOnly(libs.quickshop.bukkit)
+    compileOnly(libs.quickshop.api)
 
-    compileOnly("com.github.MilkBowl:VaultAPI:$vaultVersion")
-
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
-
-    compileOnly("com.ghostchu:quickshop-bukkit:$quickShopVersion")
-    compileOnly("com.ghostchu:quickshop-api:$quickShopVersion")
-
-    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation(libs.koin.core)
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 tasks {
     compileKotlin {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
         kotlinOptions.javaParameters = true
     }
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
     }
     build {
-        dependsOn(shadowJar)
+        dependsOn("shadowJar")
     }
-}
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-}
-
-tasks {
     runServer {
-        minecraftVersion("1.20.4")
+        minecraftVersion("1.20.6")
+    }
+    withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
     }
 }
 
-
-bukkit {
-    name = "AdvancedShopFinder" // need to change
-    version = "miencraft_plugin_version"
-    website = "https://github.com/Nlkomaru/AdvancedShopFinder"  // need to change
-    description = "Quickshop finder"
-
-    main = "$group.advancedshopfinder.AdvancedShopFinder"  // need to change
-
-    depend = listOf("QuickShop-Hikari","ProtocolLib") // need to change
-
-    apiVersion = "1.20"
-}
-
-tasks.register("depsize") {
-    description = "Prints dependencies for \"default\" configuration"
-    doLast {
-        listConfigurationDependencies(configurations["default"])
+sourceSets.main {
+    resourceFactory {
+        bukkitPluginYaml {
+            name = rootProject.name
+            version = project.version.toString()
+            website = "https://github.com/Nlkomaru/AdvancedShopFinder"
+            main = "$group.advancedshopfinder.AdvancedShopFinder"
+            apiVersion = "1.20"
+            libraries = libs.bundles.coroutines.asString()
+        }
     }
 }
+//TODO add translations
 
-tasks.register("depsize-all-configurations") {
-    description = "Prints dependencies for all available configurations"
-    doLast {
-        configurations
-            .filter { it.isCanBeResolved }
-            .forEach { listConfigurationDependencies(it) }
+fun Provider<ExternalModuleDependencyBundle>.asString(): List<String> {
+    return this.get().map { dependency ->
+        "${dependency.group}:${dependency.name}:${dependency.version}"
     }
-}
-
-
-fun listConfigurationDependencies(configuration: Configuration) {
-    val formatStr = "%,10.2f"
-
-    val size = configuration.map { it.length() / (1024.0 * 1024.0) }.sum()
-
-    val out = StringBuffer()
-    out.append("\nConfiguration name: \"${configuration.name}\"\n")
-    if (size > 0) {
-        out.append("Total dependencies size:".padEnd(65))
-        out.append("${String.format(formatStr, size)} Mb\n\n")
-
-        configuration.sortedBy { -it.length() }
-            .forEach {
-                out.append(it.name.padEnd(65))
-                out.append("${String.format(formatStr, (it.length() / 1024.0))} kb\n")
-            }
-    } else {
-        out.append("No dependencies found")
-    }
-    println(out)
 }
