@@ -7,7 +7,7 @@ coroutine = "1.8.0"
 serialization = "1.6.3"
 vault = "1.7"
 protocolLib = "5.3.0-SNAPSHOT"
-quickShop = "6.1.0.1"
+quickShop = "6.2.0.6"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
