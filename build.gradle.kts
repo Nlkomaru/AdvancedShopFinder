@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
 plugins {
     java
     alias(libs.plugins.kotlin.jvm)
@@ -41,23 +44,27 @@ dependencies {
     implementation(libs.koin.core)
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+kotlin {
+    jvmToolchain {
+        (this).languageVersion.set(JavaLanguageVersion.of(21))
+    }
+    jvmToolchain(21)
 }
 
 tasks {
     compileKotlin {
-        kotlinOptions.jvmTarget = "21"
-        kotlinOptions.javaParameters = true
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.javaParameters = true
+        compilerOptions.languageVersion.set(KotlinVersion.KOTLIN_2_0)
     }
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "21"
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
     }
     build {
-        dependsOn("shadowJar")
+        dependsOn(shadowJar)
     }
     runServer {
-        minecraftVersion("1.20.6")
+        minecraftVersion("1.21")
     }
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
