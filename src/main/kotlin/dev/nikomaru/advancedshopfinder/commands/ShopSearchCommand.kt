@@ -43,20 +43,18 @@ import kotlin.math.hypot
 
 
 @Command("advancedshopfinder", "asf", "shopfinder", "sf")
-object ShopSearchCommand: KoinComponent {
+object ShopSearchCommand : KoinComponent {
     private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
     private val plugin: AdvancedShopFinder by inject()
 
     @Subcommand("search")
     @Description("アイテムを検索します")
-    suspend fun searchItem(
-        sender: CommandSender, @ItemNameSuggestion itemName: String
-    ) {
-        val item = getKey(translateData.map, itemName) ?: Material.matchMaterial(itemName)?.translationKey()
+    suspend fun searchItem(sender: CommandSender, @ItemNameSuggestion itemName: String) {
+        val item = getKeys(translateData.map, itemName) ?: listOf(Material.matchMaterial(itemName)?.translationKey())
         val options = (sender as? Player)?.getPlayerFindOption() ?: FindOption()
         val shop = quickShop.shopManager.allShops.filter {
-            it.item.type.translationKey().equals(item, true)
+            item.contains(it.item.type.translationKey())
         }
 
         if (shop.isEmpty()) {
@@ -66,20 +64,16 @@ object ShopSearchCommand: KoinComponent {
         var message: Component = Component.text("")
         var sum = 0
 
-        val (newSellMessage, newSellSum) = processShops(
-            shop, sender, message, sum, options, ShopType.SELLING
-        )
+        val (newSellMessage, newSellSum) = processShops(shop, sender, message, sum, options, ShopType.SELLING)
         message = newSellMessage
         sum = newSellSum
 
 
-        val (newBuyMessage, newBuySum) = processShops(
-            shop, sender, message, sum, options, ShopType.BUYING
-        )
+        val (newBuyMessage, newBuySum) = processShops(shop, sender, message, sum, options, ShopType.BUYING)
         message = newBuyMessage
         sum = newBuySum
 
-        sender.sendRichMessage("<color:green><lang:${item}> の検索結果: ${sum}件")
+        sender.sendRichMessage("<color:green><lang:${itemName}> の検索結果: ${sum}件")
         val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
         when (textType) {
             TextType.COMPONENT -> sender.sendMessage(message)
@@ -91,18 +85,15 @@ object ShopSearchCommand: KoinComponent {
         }
     }
 
-    suspend fun processShops(
-        shop: List<Shop>, sender: CommandSender, message: Component, sum: Int, options: FindOption, shopType: ShopType
-    ): Pair<Component, Int> {
+    suspend fun processShops(shop: List<Shop>, sender: CommandSender, message: Component, sum: Int, options: FindOption, shopType: ShopType): Pair<Component, Int> {
         var filteredShops = shop.filter {
-            it.shopType == shopType && (withContext(Dispatchers.minecraft) {
-                if (shopType == ShopType.SELLING) it.remainingStock else it.remainingSpace
+            it.shopType==shopType && (withContext(Dispatchers.minecraft) {
+                if (shopType==ShopType.SELLING) it.remainingStock else it.remainingSpace
             } > 0 || it.isUnlimited)
         }
-        val sortType =
-            if (shopType == ShopType.SELLING) options.sortOption.sellSortType else options.sortOption.buySortType
+        val sortType = if (shopType==ShopType.SELLING) options.sortOption.sellSortType else options.sortOption.buySortType
         if (sender !is Player) {
-            filteredShops = if (shopType == ShopType.SELLING) filteredShops.sortedByDescending { it.price }
+            filteredShops = if (shopType==ShopType.SELLING) filteredShops.sortedByDescending { it.price }
             else filteredShops.sortedBy { it.price }
         } else {
             filteredShops = when (sortType) {
@@ -132,9 +123,7 @@ object ShopSearchCommand: KoinComponent {
                 async(Dispatchers.async) {
                     val luminescenceShulker = LuminescenceShulker()
                     luminescenceShulker.addTarget(sender)
-                    filteredShops.stream()
-                        .filter { getPlayerDistance(sender.location, it) < options.lightningOption.lightningDistance }
-                        .forEach {
+                    filteredShops.stream().filter { getPlayerDistance(sender.location, it) < options.lightningOption.lightningDistance }.forEach {
                             luminescenceShulker.addBlock(it.location)
                         }
                     repeat(options.lightningOption.lightningCount) {
@@ -152,11 +141,8 @@ object ShopSearchCommand: KoinComponent {
 
     private suspend fun sendShopInfo(sender: CommandSender, shopChest: Shop): Component {
         val nearPlace = getNearPlace(shopChest)
-        val nearTownDistance = hypot(
-            nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ
-        )
-        val playerLocation =
-            if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
+        val nearTownDistance = hypot(nearPlace!!.x.toDouble() - shopChest.location.blockX, nearPlace.z.toDouble() - shopChest.location.blockZ)
+        val playerLocation = if (sender is Player) sender.location else Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0)
         val distance = getPlayerDistance(playerLocation, shopChest)
         val count = if (shopChest.isBuying) getBuyingShopCount(shopChest) else getSellingShopCount(shopChest)
         val tags = getTags(shopChest, count, distance, nearPlace, nearTownDistance)
@@ -168,38 +154,17 @@ object ShopSearchCommand: KoinComponent {
     }
 
 
-    private fun getNearestPlaceDistance(shopChest: Shop) = hypot(
-        getNearPlace(shopChest)!!.x.toDouble() - shopChest.location.blockX,
-        getNearPlace(shopChest)!!.z.toDouble() - shopChest.location.blockZ
-    )
+    private fun getNearestPlaceDistance(shopChest: Shop) =
+        hypot(getNearPlace(shopChest)!!.x.toDouble() - shopChest.location.blockX, getNearPlace(shopChest)!!.z.toDouble() - shopChest.location.blockZ)
 
-    private fun getTags(
-        shopChest: Shop, count: String, distance: Int, nearPlace: PlaceData, nearTownDistance: Double
-    ): Array<TagResolver.Single> {
+    private fun getTags(shopChest: Shop, count: String, distance: Int, nearPlace: PlaceData, nearTownDistance: Double): Array<TagResolver.Single> {
         val mm = MiniMessage.miniMessage()
 
-        return arrayOf(
-            Placeholder.component(
-                "player-name", if (shopChest.isUnlimited) {
-                    Component.text("アドミンショップ")
-                } else {
-                    Component.text(Bukkit.getOfflinePlayer(shopChest.owner.uniqueId!!).name.toString())
-                }
-            ),
-            Placeholder.component("price", Component.text(shopChest.price.toString())),
-            Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())),
-            Placeholder.component("count", Component.text(count)),
-            Placeholder.component("world", Component.text(shopChest.location.world.name)),
-            Placeholder.component("x", Component.text(shopChest.location.blockX.toString())),
-            Placeholder.component("y", Component.text(shopChest.location.blockY.toString())),
-            Placeholder.component("z", Component.text(shopChest.location.blockZ.toString())),
-            Placeholder.component("distance", Component.text(distance.toString())),
-            Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)),
-            Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())),
-            Placeholder.component(
-                "shop-type", mm.deserialize(if (shopChest.isBuying) "<color:red>買取" else "<color:green>販売")
-            )
-        )
+        return arrayOf(Placeholder.component("player-name", if (shopChest.isUnlimited) {
+            Component.text("アドミンショップ")
+        } else {
+            Component.text(Bukkit.getOfflinePlayer(shopChest.owner.uniqueId!!).name.toString())
+        }), Placeholder.component("price", Component.text(shopChest.price.toString())), Placeholder.component("shop-stacking-amount", Component.text(shopChest.shopStackingAmount.toString())), Placeholder.component("count", Component.text(count)), Placeholder.component("world", Component.text(shopChest.location.world.name)), Placeholder.component("x", Component.text(shopChest.location.blockX.toString())), Placeholder.component("y", Component.text(shopChest.location.blockY.toString())), Placeholder.component("z", Component.text(shopChest.location.blockZ.toString())), Placeholder.component("distance", Component.text(distance.toString())), Placeholder.component("near-town", mm.deserialize(nearPlace.placeName)), Placeholder.component("near-town-distance", Component.text(nearTownDistance.toInt().toString())), Placeholder.component("shop-type", mm.deserialize(if (shopChest.isBuying) "<color:red>買取" else "<color:green>販売")))
     }
 
     private suspend fun getSellingShopCount(shopChest: Shop) = withContext(Dispatchers.minecraft) {
@@ -223,13 +188,18 @@ object ShopSearchCommand: KoinComponent {
     }
 
 
-    private fun <K, V> getKey(map: Map<K, V>, value: V): K? {
+    private fun <K, V> getKeys(map: Map<K, V>, value: V): List<K>? {
+        val list = arrayListOf<K>()
         for (key in map.keys) {
-            if (value == map[key]) {
-                return key
+            if (value==map[key]) {
+                list.add(key)
             }
         }
-        return null
+        return if (list.isEmpty()) {
+            null
+        } else {
+            list
+        }
     }
 
 
