@@ -9,10 +9,12 @@ import java.io.File
 
 fun main() {
     val base = ".minecraft/assets/" //TODO REPLACE TO YOUR ASSETS FOLDER
-    
-    val indexPath = base + "indexes/<version>.json" //TODO REPLACE TO YOUR INDEX FILE
-    val lang = arrayListOf("ja_JP", "ko_KR") //TODO REPLACE TO YOUR LANGUAGES
-    val indexFile = File(indexPath)
+
+    val indexes = base + "indexes\\"
+
+    val indexPath = File(indexes).listFiles().maxByOrNull { it.lastModified() }!!.absolutePath
+    val lang = arrayListOf("ja_JP", "ko_KR") // Change to the language you want to add
+    val indexFile = File(indexPath) 
     val index = indexFile.readText()
     val indexJson = Json.decodeFromString<Index>(index)
 
@@ -26,10 +28,9 @@ fun main() {
         val map = gson.fromJson(text, Map::class.java)
 
         val translateMap = mutableMapOf<String, String>()
-        map.filter { (t, _) -> t.toString().startsWith("item.") || t.toString().startsWith("block.") }
+        map.filter { (t, _) -> t.toString().startsWith("item.") || t.toString().startsWith("block.") || t.toString().startsWith("enchantment.") }
             .forEach { (t, u) ->
                 translateMap += t.toString() to u.toString()
-                println("$t : $u")
             }
         val translateMap2 = TranslateMap(translateMap)
         val json = Json.encodeToString(translateMap2)

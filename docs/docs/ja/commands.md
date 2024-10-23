@@ -4,12 +4,16 @@
 
 ## Commands list
 
-`shopfinder search <item>` - 特定のアイテムをショップリストから検索します。
+[x] `sf search <item> -p [profile]` - 特定のアイテムをショップリストから検索します。
 
-`shopfinder bookfind <enchantmentName>` - ショップリスト内のエンチャントを含む本を検索します。
+[x] `sf search-book <enchantment> -p [profile]` - ショップリスト内のエンチャント本を検索します。
 
-`shopfinder fuzzysearch <name>` - ショップリスト内のアイテムをあいまい検索します。
+[x] `sf fuzzy-search <name> -p [profile]` - ショップリスト内のアイテムをあいまい検索します。
 
-`shopfinder help` - ヘルプメッセージを表示します。
+[x] `sf help` - ヘルプメッセージを表示します。
 
-`shopfinder reload` - プラグインを再読み込みします。
+[ ] `sf tell <player>` - 当プラグインの存在を他人に伝えます。
+
+[x] `sf reload` - プラグインを再読み込みします。
+
+[ ] `sf setting <profileName>` 個別の設定を追加します。

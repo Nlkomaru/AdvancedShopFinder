@@ -7,12 +7,10 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.files.server.ConfigData
 import dev.nikomaru.advancedshopfinder.files.server.PlaceData
-import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toGsonText
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toLegacyText
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toMiniMessage
 import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toPlainText
-import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
 import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
 import dev.nikomaru.advancedshopfinder.utils.data.FindOption
@@ -33,28 +31,26 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.incendo.cloud.annotations.Argument
+import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.CommandDescription
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
-import revxrsal.commands.annotation.Command
-import revxrsal.commands.annotation.Description
-import revxrsal.commands.annotation.Subcommand
 import kotlin.math.hypot
 
 
-@Command("advancedshopfinder", "asf", "shopfinder", "sf")
+@Command("advancedshopfinder|asf|shopfinder|sf")
 object ShopSearchCommand : KoinComponent {
-    private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
     private val plugin: AdvancedShopFinder by inject()
 
-    @Subcommand("search")
-    @Description("アイテムを検索します")
-    suspend fun searchItem(sender: CommandSender, @ItemNameSuggestion itemName: String) {
-        val item = getKeys(translateData.map, itemName) ?: listOf(Material.matchMaterial(itemName)?.translationKey())
+    @Command("search <item>")
+    @CommandDescription("アイテムを検索します")
+    suspend fun searchItem(sender: CommandSender, @Argument("item") itemArray: Array<Material>) {
         val options = (sender as? Player)?.getPlayerFindOption() ?: FindOption()
         val shop = quickShop.shopManager.allShops.filter {
-            item.contains(it.item.type.translationKey())
+            itemArray.toList().contains(it.item.type)
         }
 
         if (shop.isEmpty()) {
@@ -73,7 +69,7 @@ object ShopSearchCommand : KoinComponent {
         message = newBuyMessage
         sum = newBuySum
 
-        sender.sendRichMessage("<color:green><lang:${itemName}> の検索結果: ${sum}件")
+        sender.sendRichMessage("<color:green><lang:${itemArray.first().translationKey()}> の検索結果: ${sum}件")
         val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
         when (textType) {
             TextType.COMPONENT -> sender.sendMessage(message)
@@ -187,20 +183,6 @@ object ShopSearchCommand : KoinComponent {
         }
     }
 
-
-    private fun <K, V> getKeys(map: Map<K, V>, value: V): List<K>? {
-        val list = arrayListOf<K>()
-        for (key in map.keys) {
-            if (value==map[key]) {
-                list.add(key)
-            }
-        }
-        return if (list.isEmpty()) {
-            null
-        } else {
-            list
-        }
-    }
 
 
     private fun getNearPlace(shopChest: Shop) = get<ConfigData>().placeData.minByOrNull {

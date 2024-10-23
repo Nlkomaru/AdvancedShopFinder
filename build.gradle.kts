@@ -21,7 +21,7 @@ repositories {
     maven("https://jitpack.io")
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.codemc.io/repository/maven-public/")
-    maven("https://repo.dmulloy2.net/repository/public/" )
+    maven("https://repo.dmulloy2.net/repository/public/")
 }
 
 
@@ -65,6 +65,12 @@ tasks {
     }
     runServer {
         minecraftVersion("1.21")
+        downloadPlugins {
+            modrinth("quickshop-hikari", "6.2.0.7")
+            github("dmulloy2", "ProtocolLib", "5.3.0", "ProtocolLib.jar")
+            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+121-f7a8f86.jar")
+            github("Milkbowl", "Vault", "1.7.3", "Vault.jar")
+        }
     }
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
@@ -80,6 +86,7 @@ sourceSets.main {
             main = "$group.advancedshopfinder.AdvancedShopFinder"
             apiVersion = "1.20"
             libraries = libs.bundles.coroutines.asString()
+            depend = listOf("QuickShop-Hikari", "ProtocolLib")
         }
     }
 }

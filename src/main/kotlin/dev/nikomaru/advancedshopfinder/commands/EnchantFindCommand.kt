@@ -15,19 +15,19 @@ import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.EnchantmentStorageMeta
+import org.incendo.cloud.annotations.Argument
+import org.incendo.cloud.annotations.Command
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import revxrsal.commands.annotation.Command
-import revxrsal.commands.annotation.Subcommand
 
 
-@Command("advancedshopfinder", "asf", "shopfinder", "sf")
+@Command("advancedshopfinder|asf|shopfinder|sf")
 object EnchantFindCommand: KoinComponent {
     private val quickShop: QuickShopAPI by inject()
 
-    @Subcommand("bookfind")
+    @Command("search-book <enchantment>")
     suspend fun enchantFind(
-        sender: CommandSender, enchantment: Enchantment
+        sender: CommandSender, @Argument("enchantment") enchantment: Enchantment
     ) {
         val shop = quickShop.shopManager.allShops.filter {
             it.item.type == Material.ENCHANTED_BOOK && (it.item.itemMeta as EnchantmentStorageMeta).hasStoredEnchant(
@@ -56,7 +56,7 @@ object EnchantFindCommand: KoinComponent {
         message = newBuyMessage
         sum = newBuySum
 
-        sender.sendRichMessage("<color:green><lang:${enchantment.translationKey()}> の検索結果: ${sum}件")
+        sender.sendRichMessage("<color:green><lang:${enchantment.key.key}> の検索結果: ${sum}件")
         val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
         when (textType) {
             TextType.COMPONENT -> sender.sendMessage(message)
