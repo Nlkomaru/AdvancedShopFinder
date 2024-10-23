@@ -3,23 +3,22 @@ package dev.nikomaru.advancedshopfinder
 import com.comphenix.protocol.ProtocolLibrary
 import com.ghostchu.quickshop.api.QuickShopAPI
 import dev.nikomaru.advancedshopfinder.commands.*
+import dev.nikomaru.advancedshopfinder.commands.utils.parser.EnchantmentParser
+import dev.nikomaru.advancedshopfinder.commands.utils.parser.MaterialArrayParser
 import dev.nikomaru.advancedshopfinder.files.server.Config
 import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
-import dev.nikomaru.advancedshopfinder.utils.command.EnchantmentParser.enchantmentSupport
-import dev.nikomaru.advancedshopfinder.utils.command.ItemNameSuggestion
-import dev.nikomaru.advancedshopfinder.utils.command.MaterialParser.materialSupport
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
-import org.bukkit.Material
+import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
+import org.incendo.cloud.annotations.AnnotationParser
+import org.incendo.cloud.bukkit.CloudBukkitCapabilities
+import org.incendo.cloud.execution.ExecutionCoordinator
+import org.incendo.cloud.kotlin.coroutines.annotations.installCoroutineSupport
+import org.incendo.cloud.paper.LegacyPaperCommandManager
+import org.incendo.cloud.setting.ManagerSetting
 import org.koin.core.context.GlobalContext
 import org.koin.dsl.module
-import revxrsal.commands.autocomplete.SuggestionProvider
-import revxrsal.commands.bukkit.BukkitCommandHandler
-import revxrsal.commands.command.CommandActor
-import revxrsal.commands.command.CommandParameter
-import revxrsal.commands.command.ExecutableCommand
-import revxrsal.commands.ktx.supportSuspendFunctions
 
 
 open class AdvancedShopFinder: JavaPlugin() {
@@ -49,47 +48,31 @@ open class AdvancedShopFinder: JavaPlugin() {
     }
 
     private fun setCommand() {
-        val handler = BukkitCommandHandler.create(this)
+        val commandManager = LegacyPaperCommandManager.createNative(
+            this,
+            ExecutionCoordinator.simpleCoordinator()
+        )
 
-        handler.setFlagPrefix("--")
-        handler.setSwitchPrefix("--")
-
-        handler.supportSuspendFunctions() //Enchantment
-        handler.enchantmentSupport() //Material
-        handler.materialSupport()
-
-        handler.autoCompleter.registerSuggestionFactory { parameter: CommandParameter ->
-            if (parameter.hasAnnotation(ItemNameSuggestion::class.java)) {
-                return@registerSuggestionFactory SuggestionProvider { _: List<String>, _: CommandActor, _: ExecutableCommand ->
-                    Material.entries.map {
-                        translateData.map[it.translationKey()] ?: it.translationKey()
-                    } + Material.entries.map { it.name.lowercase() }
-                }
-            }
-            null
+        if (commandManager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
+            commandManager.registerAsynchronousCompletions()
         }
 
-        handler.setHelpWriter { command, _ ->
-            java.lang.String.format(
-                """
-                <color:yellow>コマンド: <color:gray>%s
-                <color:yellow>使用方法: <color:gray>%s
-                <color:yellow>説明: <color:gray>%s
-                
-                """.trimIndent(),
-                command.path.toList(),
-                command.usage,
-                command.description,
+        commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true)
+
+        commandManager.parserRegistry().registerParser(MaterialArrayParser.materialArrayParser())
+        commandManager.parserRegistry().registerParser(EnchantmentParser.enchantmentParser())
+
+
+        val annotationParser = AnnotationParser(commandManager, CommandSender::class.java)
+        annotationParser.installCoroutineSupport()
+
+        with(annotationParser) {
+            parse(
+                EnchantFindCommand,
+                FuzzySearchCommand,
+                ReloadCommand,
+                ShopSearchCommand
             )
-        }
-
-
-        with(handler) {
-            register(ShopSearchCommand)
-            register(ReloadCommand)
-            register(EnchantFindCommand)
-            register(HelpCommand)
-            register(FuzzySearchCommand)
         }
     }
 }

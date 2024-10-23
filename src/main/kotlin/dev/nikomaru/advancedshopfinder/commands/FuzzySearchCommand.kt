@@ -14,19 +14,19 @@ import dev.nikomaru.advancedshopfinder.utils.data.TextType
 import net.kyori.adventure.text.Component
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.incendo.cloud.annotations.Argument
+import org.incendo.cloud.annotations.Command
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
-import revxrsal.commands.annotation.Command
-import revxrsal.commands.annotation.Subcommand
 
-@Command("advancedshopfinder", "asf", "shopfinder", "sf")
+@Command("advancedshopfinder|asf|shopfinder|sf")
 object FuzzySearchCommand: KoinComponent {
     private val translateData: TranslateMap by inject()
     private val quickShop: QuickShopAPI by inject()
 
-    @Subcommand("fuzzysearch")
-    suspend fun fuzzySearch(sender: CommandSender, name: String) {
+    @Command("fuzzy-search <name>")
+    suspend fun fuzzySearch(sender: CommandSender, @Argument("name") name: String) {
         val keyList = translateData.map.filter { (k, v) -> v.contains(name) || k.contains(name) }.map { (k, _) ->
             k.lowercase()
         }
