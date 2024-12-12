@@ -1,10 +1,9 @@
 ---
 sidebar_position: 1
 ---
-# 別の言語を追加するには？
+# How to add others languages?
 
-以下の手順に従って、Minecraftの言語ファイルを取得し、翻訳ファイルを作成します。
-
+Follow these steps to obtain the Minecraft language file and create a translation file.
 ```kotlin
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

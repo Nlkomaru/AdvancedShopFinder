@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# # Introduction
+# Introduction
 
 ## What is Advanced shop finder?
 
