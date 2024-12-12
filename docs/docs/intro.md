@@ -1,4 +1,8 @@
-# はじめに
+---
+sidebar_position: 1
+---
+
+# はじめに JA
 
 ## Advanced shop finder とは？
 

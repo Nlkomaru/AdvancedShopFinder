@@ -1,0 +1,8 @@
+{
+  "label": "Developer's docs",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "This is a documentations for developers"
+  }
+}

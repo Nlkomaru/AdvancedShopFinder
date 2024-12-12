@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Commands
 
 Commands are start with: `advancedShopFinder, asf, shopFinder, sf`
