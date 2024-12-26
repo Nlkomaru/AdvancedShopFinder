@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
@@ -26,6 +27,7 @@ repositories {
 
 
 dependencies {
+    implementation(kotlin("stdlib-jdk8"))
     compileOnly(libs.paper.api)
 
     implementation(libs.bundles.commands)
@@ -42,6 +44,12 @@ dependencies {
     compileOnly(libs.quickshop.api)
 
     implementation(libs.koin.core)
+
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mock.bukkit)
+
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.bundles.koin.test)
 }
 
 kotlin {
@@ -74,6 +82,14 @@ tasks {
     }
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
+    }
+    test {
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            events("passed", "skipped", "failed")
+            exceptionFormat = TestExceptionFormat.FULL
+        }
     }
 }
 
