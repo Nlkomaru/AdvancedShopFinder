@@ -13,6 +13,15 @@ plugins {
 
 group = "dev.nikomaru"
 version = "1.0-SNAPSHOT"
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+    }
+}
 
 repositories {
     mavenCentral()
@@ -27,6 +36,9 @@ repositories {
 
 
 dependencies {
+    implementation(gradleApi())
+    implementation(localGroovy())
+
     implementation(kotlin("stdlib-jdk8"))
     compileOnly(libs.paper.api)
 
@@ -91,6 +103,7 @@ tasks {
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
+
 }
 
 sourceSets.main {
@@ -107,6 +120,8 @@ sourceSets.main {
     }
 }
 //TODO add translations
+
+tasks.register("generateTranslate", dev.nikomaru.tasks.GenerateTranslateTask::class)
 
 fun Provider<ExternalModuleDependencyBundle>.asString(): List<String> {
     return this.get().map { dependency ->
