@@ -29,7 +29,7 @@ open class AdvancedShopFinder: JavaPlugin() {
         setupKoin()
         Config.loadConfig()
         setCommand()
-        val br = this.javaClass.classLoader.getResourceAsStream("ja_JP.json")!!
+        val br = this.javaClass.classLoader.getResourceAsStream("minecraft/ja_JP.json")!!
         translateData = Config.json.decodeFromStream<TranslateMap>(br)
     }
 
