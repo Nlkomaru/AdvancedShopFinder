@@ -1,11 +1,12 @@
 package dev.nikomaru.advancedshopfinder.commands.utils.parser
 
-import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
+import dev.nikomaru.advancedshopfinder.utils.translate.TranslateManager
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import org.bukkit.NamespacedKey
 import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Player
 import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.context.CommandInput
 import org.incendo.cloud.parser.ArgumentParseResult
@@ -14,10 +15,11 @@ import org.incendo.cloud.parser.ParserDescriptor
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.Locale
 
 class EnchantmentParser<CommandSender> : ArgumentParser<CommandSender, Enchantment>,
     BlockingSuggestionProvider.Strings<CommandSender>, KoinComponent {
-    val translateData: TranslateMap by inject()
+    val manager: TranslateManager by inject()
 
     companion object {
         fun enchantmentParser(): ParserDescriptor<CommandSender, Enchantment> {
@@ -28,8 +30,14 @@ class EnchantmentParser<CommandSender> : ArgumentParser<CommandSender, Enchantme
     override fun parse(
         commandContext: CommandContext<CommandSender & Any>, commandInput: CommandInput
     ): ArgumentParseResult<Enchantment> {
+        val locale = if (commandContext.sender() is Player) {
+            (commandContext.sender() as Player).locale()
+        } else {
+            Locale.getDefault()
+        }
         val input = commandInput.readString()
-        val enchantmentKey = getKeys(translateData.map, input)?.replace("enchantment.minecraft.","") ?: input
+        val enchantmentKey = getKeys(manager.getTranslateMap(locale), input)?.key?.replace("enchantment.minecraft.", "")
+            ?: input
         val enchantment = RegistryAccess.registryAccess().getRegistry<Enchantment>(RegistryKey.ENCHANTMENT).get(
             NamespacedKey.minecraft(enchantmentKey)
         )
@@ -47,8 +55,13 @@ class EnchantmentParser<CommandSender> : ArgumentParser<CommandSender, Enchantme
     override fun stringSuggestions(
         commandContext: CommandContext<CommandSender>, input: CommandInput
     ): MutableIterable<String> {
+        val locale = if (commandContext.sender() is Player) {
+            (commandContext.sender() as Player).locale()
+        } else {
+            Locale.getDefault()
+        }
         return (enchantments + enchantments.mapNotNull {
-            translateData.map["enchantment.minecraft.$it"]
+            manager.getTranslateMap(locale)[NamespacedKey.minecraft("enchantment.minecraft.$it")]
         }).toMutableList()
     }
 

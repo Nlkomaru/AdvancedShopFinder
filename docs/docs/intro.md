@@ -6,7 +6,7 @@ sidebar_position: 1
 
 ## Advanced shop finder とは？
 
-Minecraft サーバーのプラグインである [QuickShop](https://github.com/Ghost-chu/QuickShop-Hikari) に対応したショップ検索プラグインです。
+Minecraft サーバーのプラグインである [QuickShop-Hikari](https://github.com/Ghost-chu/QuickShop-Hikari) に対応したショップ検索プラグインです。
 
 ## License
 

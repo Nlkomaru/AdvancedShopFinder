@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
@@ -12,6 +14,15 @@ plugins {
 
 group = "dev.nikomaru"
 version = "1.0-SNAPSHOT"
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+    }
+}
 
 repositories {
     mavenCentral()
@@ -26,6 +37,10 @@ repositories {
 
 
 dependencies {
+    implementation(gradleApi())
+    implementation(localGroovy())
+
+    implementation(kotlin("stdlib-jdk8"))
     compileOnly(libs.paper.api)
 
     implementation(libs.bundles.commands)
@@ -41,7 +56,16 @@ dependencies {
     compileOnly(libs.quickshop.bukkit)
     compileOnly(libs.quickshop.api)
 
+    implementation(libs.bundles.arrow)
+
     implementation(libs.koin.core)
+
+    testImplementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mock.bukkit)
+
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.bundles.koin.test)
 }
 
 kotlin {
@@ -75,6 +99,15 @@ tasks {
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
     }
+    test {
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            events("passed", "skipped", "failed")
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
+
 }
 
 sourceSets.main {
@@ -91,6 +124,8 @@ sourceSets.main {
     }
 }
 //TODO add translations
+
+tasks.register("generateTranslate", dev.nikomaru.tasks.GenerateTranslateTask::class)
 
 fun Provider<ExternalModuleDependencyBundle>.asString(): List<String> {
     return this.get().map { dependency ->

@@ -11,14 +11,13 @@ import org.koin.dsl.module
 
 object Config: KoinComponent {
     private val plugin: AdvancedShopFinder by inject()
-    lateinit var json: Json
+    val json: Json = Json {
+        prettyPrint = true
+        isLenient = true
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
     fun loadConfig() {
-        json = Json {
-            prettyPrint = true
-            isLenient = true
-            encodeDefaults = true
-            ignoreUnknownKeys = true
-        }
         val configFile = plugin.dataFolder.resolve("config.json")
 
         if (!configFile.exists()) {
