@@ -9,7 +9,7 @@ const config: Config = {
     favicon: 'img/favicon.ico',
 
     // Set the production url of your site here
-    url: 'https://advanced-shop-finder.plugin.nikomaru.page',
+    url: 'https://advanced-shop-finder.plugin.nikomaru.dev',
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',
@@ -106,7 +106,7 @@ const config: Config = {
                     items: [
                         {
                             label: 'GitHub',
-                            href: 'https://github.com/nlkomaru/make-plugin',
+                            href: 'https://github.com/nlkomaru/advancedshopfinder',
                         },
                     ],
                 },

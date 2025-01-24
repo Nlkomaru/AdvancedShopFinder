@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
@@ -55,8 +56,11 @@ dependencies {
     compileOnly(libs.quickshop.bukkit)
     compileOnly(libs.quickshop.api)
 
+    implementation(libs.bundles.arrow)
+
     implementation(libs.koin.core)
 
+    testImplementation(libs.kotlinx.serialization.json)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mock.bukkit)
 

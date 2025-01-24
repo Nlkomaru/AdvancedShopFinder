@@ -6,9 +6,9 @@ import dev.nikomaru.advancedshopfinder.commands.*
 import dev.nikomaru.advancedshopfinder.commands.utils.parser.EnchantmentParser
 import dev.nikomaru.advancedshopfinder.commands.utils.parser.MaterialArrayParser
 import dev.nikomaru.advancedshopfinder.files.server.Config
-import dev.nikomaru.advancedshopfinder.files.server.TranslateMap
+import dev.nikomaru.advancedshopfinder.utils.translate.TranslateManager
+import dev.nikomaru.advancedshopfinder.utils.translate.TranslateManagerImpl
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.decodeFromStream
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
 import org.incendo.cloud.annotations.AnnotationParser
@@ -22,7 +22,6 @@ import org.koin.dsl.module
 
 
 open class AdvancedShopFinder: JavaPlugin() {
-    private lateinit var translateData: TranslateMap
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun onEnable() { // Plugin startup logic
@@ -30,7 +29,7 @@ open class AdvancedShopFinder: JavaPlugin() {
         Config.loadConfig()
         setCommand()
         val br = this.javaClass.classLoader.getResourceAsStream("minecraft/ja_JP.json")!!
-        translateData = Config.json.decodeFromStream<TranslateMap>(br)
+
     }
 
     private fun setupKoin() {
@@ -39,7 +38,7 @@ open class AdvancedShopFinder: JavaPlugin() {
                 single { this@AdvancedShopFinder }
                 single { QuickShopAPI.getInstance() }
                 single { ProtocolLibrary.getProtocolManager() }
-                single { translateData }
+                single { TranslateManagerImpl() as TranslateManager }
             })
         }
     }

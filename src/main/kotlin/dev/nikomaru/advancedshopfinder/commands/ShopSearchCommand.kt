@@ -7,16 +7,11 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.files.server.ConfigData
 import dev.nikomaru.advancedshopfinder.files.server.PlaceData
-import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toGsonText
-import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toLegacyText
-import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toMiniMessage
-import dev.nikomaru.advancedshopfinder.utils.ComponentUtils.toPlainText
 import dev.nikomaru.advancedshopfinder.utils.coroutines.async
 import dev.nikomaru.advancedshopfinder.utils.coroutines.minecraft
 import dev.nikomaru.advancedshopfinder.utils.data.FindOption
 import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
 import dev.nikomaru.advancedshopfinder.utils.data.SortType
-import dev.nikomaru.advancedshopfinder.utils.data.TextType
 import dev.nikomaru.advancedshopfinder.utils.display.LuminescenceShulker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -70,15 +65,7 @@ object ShopSearchCommand : KoinComponent {
         sum = newBuySum
 
         sender.sendRichMessage("<color:green><lang:${itemArray.first().translationKey()}> の検索結果: ${sum}件")
-        val textType = (sender as? Player)?.getPlayerFindOption()?.textType ?: TextType.COMPONENT
-        when (textType) {
-            TextType.COMPONENT -> sender.sendMessage(message)
-            TextType.LEGACY -> sender.sendMessage(message.toLegacyText())
-            TextType.GSON -> sender.sendMessage(message.toGsonText())
-            TextType.PLAIN -> sender.sendMessage(message.toPlainText())
-            TextType.MINI_MESSAGE -> sender.sendRichMessage(message.toMiniMessage())
-            TextType.MINI_MESSAGE_RAW -> sender.sendMessage(message.toMiniMessage())
-        }
+        sender.sendMessage(message)
     }
 
     suspend fun processShops(shop: List<Shop>, sender: CommandSender, message: Component, sum: Int, options: FindOption, shopType: ShopType): Pair<Component, Int> {
@@ -114,19 +101,24 @@ object ShopSearchCommand : KoinComponent {
             newSum++
         }
 
-        if (options.lightningOption.lightning && sender is Player) {
+        if (sender is Player) {
+
+            val lightningTimeMills: Long = 1000
+            val lightningIntervalMills: Long = 400
+            val lightningCount: Int = 10
+            val lightningDistance: Int = 200
             plugin.launch {
                 async(Dispatchers.async) {
                     val luminescenceShulker = LuminescenceShulker()
                     luminescenceShulker.addTarget(sender)
-                    filteredShops.stream().filter { getPlayerDistance(sender.location, it) < options.lightningOption.lightningDistance }.forEach {
+                    filteredShops.stream().filter { getPlayerDistance(sender.location, it) < lightningDistance }.forEach {
                             luminescenceShulker.addBlock(it.location)
                         }
-                    repeat(options.lightningOption.lightningCount) {
+                    repeat(lightningCount) {
                         luminescenceShulker.display()
-                        delay(options.lightningOption.lightningTimeMills)
+                        delay(lightningTimeMills)
                         luminescenceShulker.stop()
-                        delay(options.lightningOption.lightningIntervalMills)
+                        delay(lightningIntervalMills)
                     }
                 }
             }

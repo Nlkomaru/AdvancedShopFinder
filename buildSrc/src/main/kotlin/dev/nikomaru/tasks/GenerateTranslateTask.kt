@@ -2,12 +2,13 @@ package dev.nikomaru.tasks
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import org.bukkit.NamespacedKey
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import java.net.URI
-
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -41,7 +42,7 @@ open class GenerateTranslateTask : DefaultTask() {
 
         val langJson = gson.fromJson(lang, JsonObject::class.java)
 
-        val langList = langJson.get("files").asJsonArray.asList().map { it.asString.split(".")[0] }
+        val langList = langJson.get("files").asJsonArray.toList().map { it.asString.split(".")[0] }
 
         println("detectedLang: $langList")
 
@@ -53,31 +54,33 @@ open class GenerateTranslateTask : DefaultTask() {
 
             val translateMap = mutableMapOf<String, String>()
             map.filter { (t, _) ->
-                t.toString().startsWith("item.") || t.toString().startsWith("block.") || t.toString()
-                    .startsWith("enchantment.")
+                t.toString().startsWith("item.minecraft") || t.toString().startsWith("block.minecraft") || t.toString().startsWith("enchantment.minecraft")
             }.forEach { (t, u) ->
-                    translateMap += t.toString() to u.toString()
+                translateMap += t.toString() to u.toString()
+            }
+
+            val translateMap2 = translateMap.map { (k, v) ->
+                try {
+                    NamespacedKey.minecraft(k)
+                } catch (e: Exception) {
+                    println("error: $k, $v")
                 }
-            val translateMap2 = TranslateMap(translateMap)
+                Pair(NamespacedKey.minecraft(k), v)
+            }.toMap()
+
             val json = Json {
                 prettyPrint = true
                 isLenient = true
                 encodeDefaults = true
                 ignoreUnknownKeys = true
+            }
 
-            }.encodeToString(translateMap2)
+            val output = json.encodeToString(MapSerializer(NamespacedKeySerializer, String.serializer()), translateMap2)
 
-            val output = resourceDir.resolve("$lang.json").toFile()
-            output.parentFile.mkdirs()
-            output.createNewFile()
-            output.writeText(json.replace("\n","\r\n"))
+            val outputFile = resourceDir.resolve("$lang.json").toFile()
+            outputFile.parentFile.mkdirs()
+            outputFile.createNewFile()
+            outputFile.writeText(output)
         }
     }
-
-
 }
-
-@kotlinx.serialization.Serializable
-data class TranslateMap(
-    var map: Map<String, String>
-)

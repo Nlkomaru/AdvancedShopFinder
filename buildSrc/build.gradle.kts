@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
@@ -16,6 +18,9 @@ buildscript {
 
 repositories {
     mavenCentral()
+
+    maven("https://repo.papermc.io/repository/maven-public/")
+
 }
 
 dependencies {
@@ -23,5 +28,8 @@ dependencies {
     implementation(localGroovy())
     implementation(libs.kotlinx.serialization.json)
     implementation("com.google.code.gson:gson:2.11.0")
+    compileOnly(libs.paper.api)
+    implementation(libs.mock.bukkit)
+
 }
 
