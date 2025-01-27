@@ -9,7 +9,7 @@ serialization = "1.8.0"
 vault = "1.7.1"
 protocolLib = "5.3.0"
 quickShop = "6.2.0.8"
-arrow = "1.2.4"
+arrow = "2.0.1"
 
 koin = "4.0.2"
 junit = "5.11.4"
