@@ -11,7 +11,7 @@ protocolLib = "5.3.0"
 quickShop = "6.2.0.8"
 arrow = "1.2.4"
 
-koin = "4.0.0"
+koin = "4.0.2"
 junit = "5.11.4"
 mockBukkit = "3.93.2"
 
