@@ -35,7 +35,7 @@ class EnchantmentParser<CommandSender> : ArgumentParser<CommandSender, Enchantme
         } else {
             Locale.getDefault()
         }
-        val input = commandInput.readString()
+        val input = commandInput.readStringSkipWhitespace()
         val enchantmentKey = getKeys(manager.getTranslateMap(locale), input)?.key?.replace("enchantment.minecraft.", "")
             ?: input
         val enchantment = RegistryAccess.registryAccess().getRegistry<Enchantment>(RegistryKey.ENCHANTMENT).get(

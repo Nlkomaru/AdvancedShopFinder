@@ -2,7 +2,10 @@ package dev.nikomaru.advancedshopfinder
 
 import com.comphenix.protocol.ProtocolLibrary
 import com.ghostchu.quickshop.api.QuickShopAPI
-import dev.nikomaru.advancedshopfinder.commands.*
+import dev.nikomaru.advancedshopfinder.commands.EnchantFindCommand
+import dev.nikomaru.advancedshopfinder.commands.FuzzySearchCommand
+import dev.nikomaru.advancedshopfinder.commands.ReloadCommand
+import dev.nikomaru.advancedshopfinder.commands.ShopSearchCommand
 import dev.nikomaru.advancedshopfinder.commands.utils.parser.EnchantmentParser
 import dev.nikomaru.advancedshopfinder.commands.utils.parser.MaterialArrayParser
 import dev.nikomaru.advancedshopfinder.files.server.Config
@@ -28,8 +31,6 @@ open class AdvancedShopFinder: JavaPlugin() {
         setupKoin()
         Config.loadConfig()
         setCommand()
-        val br = this.javaClass.classLoader.getResourceAsStream("minecraft/ja_JP.json")!!
-
     }
 
     private fun setupKoin() {
@@ -38,7 +39,7 @@ open class AdvancedShopFinder: JavaPlugin() {
                 single { this@AdvancedShopFinder }
                 single { QuickShopAPI.getInstance() }
                 single { ProtocolLibrary.getProtocolManager() }
-                single { TranslateManagerImpl() as TranslateManager }
+                single<TranslateManager> {  TranslateManagerImpl() }
             })
         }
     }

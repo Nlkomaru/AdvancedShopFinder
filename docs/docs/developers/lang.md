@@ -12,3 +12,7 @@ sidebar_position: 10
 ```bash
 ./gradlew generateTranslate
 ```
+
+このTaskを実行すると、`src/main/resources/minecraft`ディレクトリに言語ファイルが生成されます。
+
+なお、コマンドでの解析の際、空白によって文字列が分割されるため、`_`で文字列が結合されています。
