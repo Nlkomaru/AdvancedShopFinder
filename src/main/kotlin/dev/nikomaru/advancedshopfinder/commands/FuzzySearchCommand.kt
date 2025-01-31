@@ -12,7 +12,7 @@ import java.util.Locale
 @Command("advancedshopfinder|asf|shopfinder|sf")
 object FuzzySearchCommand: KoinComponent {
     @Command("fuzzy-search <name>")
-    suspend fun fuzzySearch(sender: CommandSender, @Argument("name") name: String) {
+    fun fuzzySearch(sender: CommandSender, @Argument("name") name: String) {
         val locale = if (sender is Player) sender.locale() else Locale.getDefault()
         val searcher: Searcher<Pair<String, Locale>> = FuzzySearcher()
         searcher

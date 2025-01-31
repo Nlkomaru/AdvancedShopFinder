@@ -40,7 +40,6 @@ dependencies {
     implementation(gradleApi())
     implementation(localGroovy())
 
-    implementation(kotlin("stdlib-jdk8"))
     compileOnly(libs.paper.api)
 
     implementation(libs.bundles.commands)
@@ -58,6 +57,7 @@ dependencies {
 
     implementation(libs.bundles.arrow)
 
+    implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
 
     testImplementation(libs.kotlinx.serialization.json)
@@ -75,6 +75,7 @@ kotlin {
     jvmToolchain(21)
 }
 
+
 tasks {
     compileKotlin {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
@@ -88,11 +89,11 @@ tasks {
         dependsOn(shadowJar)
     }
     runServer {
-        minecraftVersion("1.21")
+        minecraftVersion("1.21.4")
         downloadPlugins {
             modrinth("quickshop-hikari", "6.2.0.7")
             github("dmulloy2", "ProtocolLib", "5.3.0", "ProtocolLib.jar")
-            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+121-f7a8f86.jar")
+            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+162-ea3ea20.jar")
             github("Milkbowl", "Vault", "1.7.3", "Vault.jar")
         }
     }

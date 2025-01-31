@@ -56,7 +56,7 @@ open class GenerateTranslateTask : DefaultTask() {
             map.filter { (t, _) ->
                 t.toString().startsWith("item.minecraft") || t.toString().startsWith("block.minecraft") || t.toString().startsWith("enchantment.minecraft")
             }.forEach { (t, u) ->
-                translateMap += t.toString() to u.toString()
+                translateMap += t.toString() to u.toString().replace(" ","_")
             }
 
             val translateMap2 = translateMap.map { (k, v) ->
