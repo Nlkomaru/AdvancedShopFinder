@@ -11,7 +11,7 @@ quickShop = "6.2.0.8"
 arrow = "2.0.1"
 
 koinVersion = "4.1.0-Beta5"
-junit = "5.12.0"
+junit = "5.12.1"
 mockBukkit = "3.93.2"
 
 [libraries]
@@ -43,8 +43,9 @@ koin-test-junit5 = { group = "io.insert-koin", name = "koin-test-junit5" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
 resource-factory = { id = "xyz.jpenilla.resource-factory", version = "1.2.0" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.20-RC2" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.20-RC3" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.1.20-RC3" }
+
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 
 
