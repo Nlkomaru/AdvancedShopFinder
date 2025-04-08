@@ -7,7 +7,7 @@ coroutine = "1.10.1"
 serialization = "1.8.0"
 vault = "1.7.1"
 protocolLib = "5.3.0"
-quickShop = "6.2.0.8"
+quickShop = "6.2.0.9-RELEASE-1"
 arrow = "2.0.1"
 
 koinVersion = "4.1.0-Beta5"
