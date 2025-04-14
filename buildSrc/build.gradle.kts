@@ -27,7 +27,7 @@ dependencies {
     implementation(gradleApi())
     implementation(localGroovy())
     implementation(libs.kotlinx.serialization.json)
-    implementation("com.google.code.gson:gson:2.12.1")
+    implementation("com.google.code.gson:gson:2.13.0")
     compileOnly(libs.paper.api)
     implementation(libs.mock.bukkit)
 
