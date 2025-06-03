@@ -11,7 +11,7 @@ quickShop = "6.2.0.9-RELEASE-1"
 arrow = "2.1.2"
 
 koinVersion = "4.1.0-RC1"
-junit = "5.12.2"
+junit = "5.13.0"
 mockBukkit = "3.93.2"
 
 [libraries]
