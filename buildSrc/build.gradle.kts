@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
     }
 }
 
@@ -27,7 +27,7 @@ dependencies {
     implementation(gradleApi())
     implementation(localGroovy())
     implementation(libs.kotlinx.serialization.json)
-    implementation("com.google.code.gson:gson:2.13.0")
+    implementation("com.google.code.gson:gson:2.13.2")
     compileOnly(libs.paper.api)
     implementation(libs.mock.bukkit)
 

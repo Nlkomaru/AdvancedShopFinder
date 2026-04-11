@@ -20,15 +20,14 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
     }
 }
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://oss.sonatype.org/content/groups/public/")
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://central.sonatype.com/repository/maven-snapshots/")
     maven("https://jitpack.io")
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.codemc.io/repository/maven-public/")
@@ -91,7 +90,7 @@ tasks {
     runServer {
         minecraftVersion("1.21.4")
         downloadPlugins {
-            modrinth("quickshop-hikari", "6.2.0.7")
+            modrinth("quickshop-hikari", "6.2.0.11")
             github("dmulloy2", "ProtocolLib", "5.3.0", "ProtocolLib.jar")
             url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+162-ea3ea20.jar")
             github("Milkbowl", "Vault", "1.7.3", "Vault.jar")
