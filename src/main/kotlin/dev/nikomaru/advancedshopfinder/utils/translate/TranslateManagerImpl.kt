@@ -7,7 +7,6 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.bukkit.NamespacedKey
-import org.gradle.internal.impldep.org.apache.ivy.plugins.resolver.JarResolver
 import org.koin.core.component.KoinComponent
 import java.io.InputStream
 import java.nio.file.Paths
@@ -45,7 +44,7 @@ class TranslateManagerImpl : TranslateManager, KoinComponent {
 
     init {
         val jarPath = Paths.get(
-            JarResolver::class.java.protectionDomain.codeSource.location.toURI()
+            this::class.java.protectionDomain.codeSource.location.toURI()
         ).toString()
 
         ZipFile(jarPath).use { zipFile ->
