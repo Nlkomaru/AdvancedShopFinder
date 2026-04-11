@@ -36,9 +36,6 @@ repositories {
 
 
 dependencies {
-    implementation(gradleApi())
-    implementation(localGroovy())
-
     compileOnly(libs.paper.api)
 
     implementation(libs.bundles.commands)
@@ -88,11 +85,11 @@ tasks {
         dependsOn(shadowJar)
     }
     runServer {
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.21.11")
         downloadPlugins {
             modrinth("quickshop-hikari", "6.2.0.11")
-            github("dmulloy2", "ProtocolLib", "5.3.0", "ProtocolLib.jar")
-            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+162-ea3ea20.jar")
+            github("dmulloy2", "ProtocolLib", "5.4.0", "ProtocolLib.jar")
+            url("https://cdn.modrinth.com/data/hXiIvTyT/versions/Oa9ZDzZq/EssentialsX-2.21.2.jar")
             github("Milkbowl", "Vault", "1.7.3", "Vault.jar")
         }
     }
@@ -118,7 +115,8 @@ sourceSets.main {
             website = "https://github.com/Nlkomaru/AdvancedShopFinder"
             main = "$group.advancedshopfinder.AdvancedShopFinder"
             apiVersion = "1.20"
-            libraries = libs.bundles.coroutines.asString()
+            libraries = libs.bundles.coroutines.asString() +
+                listOf("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
             depend = listOf("QuickShop-Hikari", "ProtocolLib")
         }
     }
