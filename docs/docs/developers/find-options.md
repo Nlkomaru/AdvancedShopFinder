@@ -9,18 +9,21 @@ sidebar_position: 1
 
 ```json
 {
-  "default": "profile-1",
-  "profiles": [
-    {
-      "name": "profile-1",
-      "interface": "GUI",
+  "setting": "default",
+  "findOptions": {
+    "default": {
+      "version": 1,
+      "limitAmountOption": {
+        "buyFindLimit": -1,
+        "sellFindLimit": -1
+      },
       "sortOption": {
         "buySortType": "DESC_PRICE_PER_ITEM",
         "sellSortType": "ASC_PRICE_PER_ITEM"
       },
       "showNoStockShop": false,
-      "textType": "COMPONENT"
+      "showOwnerNotHasEnoughMoneyShop": false
     }
-  ]
+  }
 }
 ```

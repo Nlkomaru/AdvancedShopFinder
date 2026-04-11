@@ -6,13 +6,13 @@ cloudPaper = "2.0.0-SNAPSHOT"
 coroutine = "1.10.1"
 serialization = "1.8.0"
 vault = "1.7.1"
-protocolLib = "5.3.0"
+protocolLib = "5.4.0"
 quickShop = "6.2.0.8"
 arrow = "2.0.1"
-
 koinVersion = "3.6.0-Beta5"
 junit = "5.11.4"
 mockBukkit = "3.93.2"
+ktlint = "13.1.0"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
@@ -25,14 +25,13 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 mccoroutine-bukkit-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-api", version.ref = "mccoroutine" }
 mccoroutine-bukkit-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-core", version.ref = "mccoroutine" }
 vault-api = { group = "com.github.MilkBowl", name = "VaultAPI", version.ref = "vault" }
-protocol-lib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
+protocol-lib = { group = "net.dmulloy2", name = "ProtocolLib", version.ref = "protocolLib" }
 quickshop-bukkit = { group = "com.ghostchu", name = "quickshop-bukkit", version.ref = "quickShop" }
 quickshop-api = { group = "com.ghostchu", name = "quickshop-api", version.ref = "quickShop" }
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koinVersion" }
 koin-core = { group = "io.insert-koin", name = "koin-core" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
-
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutine" }
 mock-bukkit = { group = "com.github.seeseemelk", name = "MockBukkit-v1.20", version.ref = "mockBukkit" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
@@ -46,6 +45,7 @@ shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.20-Beta2" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.1.20-Beta2" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 
 [bundles]

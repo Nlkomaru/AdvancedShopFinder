@@ -1,6 +1,5 @@
 rootProject.name = "AdvancedShopFinder"
 
-
 pluginManagement {
     repositories {
         gradlePluginPortal()

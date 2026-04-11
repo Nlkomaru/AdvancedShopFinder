@@ -1,5 +1,4 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
@@ -10,19 +9,11 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory)
+    alias(libs.plugins.ktlint)
 }
 
 group = "dev.nikomaru"
-version = "1.0-SNAPSHOT"
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
-    }
-}
+val version: String by project
 
 repositories {
     mavenCentral()
@@ -34,7 +25,6 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://repo.dmulloy2.net/repository/public/")
 }
-
 
 dependencies {
     implementation(gradleApi())
@@ -70,30 +60,39 @@ dependencies {
 
 kotlin {
     jvmToolchain {
-        (this).languageVersion.set(JavaLanguageVersion.of(21))
+        (this).languageVersion.set(JavaLanguageVersion.of(23))
     }
-    jvmToolchain(21)
+    jvmToolchain(23)
 }
 
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    debug.set(true)
+    ignoreFailures.set(true)
+    filter {
+        include("src/**")
+        include("buildSrc/**")
+        exclude("**/config/**")
+    }
+}
 
 tasks {
     compileKotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_23)
         compilerOptions.javaParameters = true
         compilerOptions.languageVersion.set(KotlinVersion.KOTLIN_2_0)
     }
     compileTestKotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_23)
     }
     build {
         dependsOn(shadowJar)
     }
     runServer {
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.21.8")
         downloadPlugins {
-            modrinth("quickshop-hikari", "6.2.0.7")
-            github("dmulloy2", "ProtocolLib", "5.3.0", "ProtocolLib.jar")
-            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+162-ea3ea20.jar")
+            modrinth("quickshop-hikari", "6.2.0.10")
+            github("dmulloy2", "ProtocolLib", "5.4.0", "ProtocolLib.jar")
+            github("EssentialsX", "Essentials", "2.21.2", "EssentialsX-2.21.2.jar")
             github("Milkbowl", "Vault", "1.7.3", "Vault.jar")
         }
     }
@@ -108,7 +107,6 @@ tasks {
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
-
 }
 
 sourceSets.main {
@@ -120,16 +118,14 @@ sourceSets.main {
             main = "$group.advancedshopfinder.AdvancedShopFinder"
             apiVersion = "1.20"
             libraries = libs.bundles.coroutines.asString()
-            depend = listOf("QuickShop-Hikari", "ProtocolLib")
+            depend = listOf("QuickShop-Hikari", "ProtocolLib", "Vault")
         }
     }
 }
-//TODO add translations
 
 tasks.register("generateTranslate", dev.nikomaru.tasks.GenerateTranslateTask::class)
 
-fun Provider<ExternalModuleDependencyBundle>.asString(): List<String> {
-    return this.get().map { dependency ->
+fun Provider<ExternalModuleDependencyBundle>.asString(): List<String> =
+    this.get().map { dependency ->
         "${dependency.group}:${dependency.name}:${dependency.version}"
     }
-}

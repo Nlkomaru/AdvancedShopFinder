@@ -1,7 +1,7 @@
 # コンフィグについて
 
 
-```jsonc
+```javascript
 {
    "configVersion": 2, //Don't touch this
    "placeData":[

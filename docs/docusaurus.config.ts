@@ -114,10 +114,39 @@ const config: Config = {
             copyright: `No right reserved. This docs under CC0. Built with Docusaurus.`,
         },
         prism: {
+            additionalLanguages: [
+                "java",
+                "groovy",
+                "diff",
+                "toml",
+                "yaml",
+                "kotlin",
+            ],
             theme: prismThemes.github,
             darkTheme: prismThemes.dracula,
         },
     } satisfies Preset.ThemeConfig,
+    future: {
+        v4: {
+            removeLegacyPostBuildHeadAttribute: true,
+            useCssCascadeLayers: true,
+        },
+        experimental_faster: {
+            swcJsLoader: true,
+            swcJsMinimizer: true,
+            swcHtmlMinimizer: true,
+            lightningCssMinimizer: true,
+            rspackBundler: true,
+            rspackPersistentCache: true,
+            ssgWorkerThreads: true,
+            mdxCrossCompilerCache: true,
+        },
+        experimental_storage: {
+            type: 'localStorage',
+            namespace: true,
+        },
+        experimental_router: 'hash',
+    },
 };
 
 export default config;

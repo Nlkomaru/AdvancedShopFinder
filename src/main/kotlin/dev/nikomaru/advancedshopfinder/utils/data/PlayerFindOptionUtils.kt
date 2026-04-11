@@ -10,18 +10,23 @@ import org.bukkit.entity.Player
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-object PlayerFindOptionUtils: KoinComponent {
+object PlayerFindOptionUtils : KoinComponent {
     private val plugin: AdvancedShopFinder by inject()
 
-    suspend fun Player.getPlayerFindOption() = withContext(Dispatchers.IO) {
-        val player = this@getPlayerFindOption
-        val file = plugin.dataFolder.resolve("playerdata").resolve("${player.uniqueId}").resolve("config.json")
-        if (!file.exists()) {
-            file.parentFile.mkdirs()
-            file.createNewFile()
-            file.writeText(json.encodeToString(PlayerFindOption()))
+    suspend fun Player.getPlayerFindOption() =
+        withContext(Dispatchers.IO) {
+            val player = this@getPlayerFindOption
+            val file =
+                plugin.dataFolder
+                    .resolve("playerdata")
+                    .resolve("${player.uniqueId}")
+                    .resolve("config.json")
+            if (!file.exists()) {
+                file.parentFile.mkdirs()
+                file.createNewFile()
+                file.writeText(json.encodeToString(PlayerFindOption()))
+            }
+            val config = json.decodeFromString<PlayerFindOption>(file.readText())
+            config.findOptions[config.setting]
         }
-        val config = json.decodeFromString<PlayerFindOption>(file.readText())
-        config.findOptions[config.setting]
-    }
 }

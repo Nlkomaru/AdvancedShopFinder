@@ -8,6 +8,7 @@ data class FindOption(
     val limitAmountOption: LimitAmountOption = LimitAmountOption(),
     val sortOption: SortOption = SortOption(),
     val showNoStockShop: Boolean = false,
+    val showOwnerNotHasEnoughMoneyShop: Boolean = false,
 )
 
 @Serializable
