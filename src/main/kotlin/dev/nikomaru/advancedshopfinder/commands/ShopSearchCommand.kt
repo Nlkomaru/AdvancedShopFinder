@@ -2,7 +2,6 @@ package dev.nikomaru.advancedshopfinder.commands
 
 import com.ghostchu.quickshop.api.QuickShopAPI
 import com.ghostchu.quickshop.api.shop.Shop
-import com.ghostchu.quickshop.api.shop.ShopType
 import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.nikomaru.advancedshopfinder.AdvancedShopFinder
 import dev.nikomaru.advancedshopfinder.files.server.ConfigData
@@ -55,12 +54,12 @@ object ShopSearchCommand : KoinComponent {
         var message: Component = Component.text("")
         var sum = 0
 
-        val (newSellMessage, newSellSum) = processShops(shop, sender, message, sum, options, ShopType.SELLING)
+        val (newSellMessage, newSellSum) = processShops(shop, sender, message, sum, options, buying = false)
         message = newSellMessage
         sum = newSellSum
 
 
-        val (newBuyMessage, newBuySum) = processShops(shop, sender, message, sum, options, ShopType.BUYING)
+        val (newBuyMessage, newBuySum) = processShops(shop, sender, message, sum, options, buying = true)
         message = newBuyMessage
         sum = newBuySum
 
@@ -68,16 +67,16 @@ object ShopSearchCommand : KoinComponent {
         sender.sendMessage(message)
     }
 
-    suspend fun processShops(shop: List<Shop>, sender: CommandSender, message: Component, sum: Int, options: FindOption, shopType: ShopType): Pair<Component, Int> {
+    suspend fun processShops(shop: List<Shop>, sender: CommandSender, message: Component, sum: Int, options: FindOption, buying: Boolean): Pair<Component, Int> {
         var filteredShops = shop.filter {
-            it.shopType==shopType && (withContext(Dispatchers.minecraft) {
-                if (shopType==ShopType.SELLING) it.remainingStock else it.remainingSpace
+            it.isBuying == buying && (withContext(Dispatchers.minecraft) {
+                if (buying) it.remainingSpace else it.remainingStock
             } > 0 || it.isUnlimited)
         }
-        val sortType = if (shopType==ShopType.SELLING) options.sortOption.sellSortType else options.sortOption.buySortType
+        val sortType = if (buying) options.sortOption.buySortType else options.sortOption.sellSortType
         if (sender !is Player) {
-            filteredShops = if (shopType==ShopType.SELLING) filteredShops.sortedByDescending { it.price }
-            else filteredShops.sortedBy { it.price }
+            filteredShops = if (buying) filteredShops.sortedBy { it.price }
+            else filteredShops.sortedByDescending { it.price }
         } else {
             filteredShops = when (sortType) {
                 SortType.ASC_PRICE_PER_STACK -> filteredShops.sortedBy { it.price }

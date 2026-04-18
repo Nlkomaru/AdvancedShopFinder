@@ -1,7 +1,6 @@
 package dev.nikomaru.advancedshopfinder.commands
 
 import com.ghostchu.quickshop.api.QuickShopAPI
-import com.ghostchu.quickshop.api.shop.ShopType
 import dev.nikomaru.advancedshopfinder.utils.data.FindOption
 import dev.nikomaru.advancedshopfinder.utils.data.PlayerFindOptionUtils.getPlayerFindOption
 import net.kyori.adventure.text.Component
@@ -39,14 +38,14 @@ object EnchantFindCommand: KoinComponent {
         var sum = 0
 
         val (newSellMessage, newSellSum) = ShopSearchCommand.processShops(
-            shop, sender, message, sum, options, ShopType.SELLING
+            shop, sender, message, sum, options, buying = false
         )
         message = newSellMessage
         sum = newSellSum
 
 
         val (newBuyMessage, newBuySum) = ShopSearchCommand.processShops(
-            shop, sender, message, sum, options, ShopType.BUYING
+            shop, sender, message, sum, options, buying = true
         )
         message = newBuyMessage
         sum = newBuySum
