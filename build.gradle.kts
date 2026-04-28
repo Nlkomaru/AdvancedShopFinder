@@ -20,7 +20,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
     }
 }
 
@@ -116,7 +116,7 @@ sourceSets.main {
             main = "$group.advancedshopfinder.AdvancedShopFinder"
             apiVersion = "1.20"
             libraries = libs.bundles.coroutines.asString() +
-                listOf("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
+                listOf("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
             depend = listOf("QuickShop-Hikari", "ProtocolLib")
         }
     }
